@@ -6,7 +6,7 @@
   padding: var(--header-height) var(--gutter) 64px;
   overflow: hidden;
   background: var(--taupe);
-  color: var(--cream);
+  color: var(--brown);
 }
 
 .glow {
@@ -45,7 +45,7 @@
   font-weight: 300;
   line-height: 0.82;
   letter-spacing: 0.04em;
-  color: var(--cream);
+  color: var(--brown);
 }
 
 .letterMask {
@@ -90,7 +90,7 @@
   font-weight: 450;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--cream);
+  color: var(--brown-deep);
   background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
   transition: background-size 0.6s var(--ease-out);
 }
@@ -111,7 +111,7 @@
   font-size: 10px;
   letter-spacing: 0.34em;
   text-transform: uppercase;
-  color: rgba(241, 238, 231, 0.85);
+  color: var(--muted);
 }
 
 .scrollLine {
@@ -119,14 +119,14 @@
   width: 1px;
   height: 46px;
   overflow: hidden;
-  background: rgba(241, 238, 231, 0.3);
+  background: var(--line);
 }
 
 .scrollLine::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--cream);
+  background: var(--brown);
   animation: scroll-line 2.4s var(--ease-out) infinite;
 }
 

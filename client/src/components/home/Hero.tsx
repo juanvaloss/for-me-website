@@ -77,7 +77,7 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 1.25, ease: EASE_OUT }}
         >
-          <Link to="/catalog" className="btn btn-light">
+          <Link to="/catalog" className="btn btn-primary">
             Ver Drop 01
           </Link>
           <button

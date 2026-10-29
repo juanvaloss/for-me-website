@@ -25,7 +25,7 @@ export function Closing() {
           />
         </h2>
         <Reveal delay={0.3} className={styles.actions}>
-          <Link to="/catalog" className="btn btn-light">
+          <Link to="/catalog" className="btn btn-primary">
             Explorar el Drop 01
           </Link>
           <a

@@ -17,25 +17,25 @@
   font-family: var(--font-serif);
   font-size: 15px;
   letter-spacing: 0.32em;
-  color: var(--cream);
+  color: var(--brown);
 }
 
-/* Heavy grotesk titles, like the category pages of the Drop 01 catalog. */
+/* Same light serif as the hero wordmark, so the page titles read as one family. */
 .title {
-  font-family: var(--font-sans);
-  font-size: clamp(60px, 11vw, 168px);
-  font-weight: 700;
-  line-height: 0.9;
-  letter-spacing: -0.01em;
-  text-transform: uppercase;
-  color: var(--cream);
+  font-family: var(--font-serif);
+  font-size: clamp(72px, 12vw, 180px);
+  font-weight: 300;
+  /* Room for the descender of the "g" inside the reveal mask. */
+  line-height: 1.12;
+  letter-spacing: 0.01em;
+  color: var(--brown);
 }
 
 .subtitle {
   max-width: 470px;
   font-size: 16px;
   line-height: 1.7;
-  color: rgba(241, 238, 231, 0.92);
+  color: var(--muted);
 }
 
 .toolbar {

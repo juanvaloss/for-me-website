@@ -1,7 +1,7 @@
 .closing {
   padding: clamp(110px, 15vw, 220px) 0;
   background: var(--drop-gradient);
-  color: var(--cream);
+  color: var(--brown);
 }
 
 .inner {
@@ -23,11 +23,12 @@
   font-size: clamp(54px, 8.6vw, 136px);
   font-weight: 300;
   line-height: 0.96;
-  color: var(--cream);
+  color: var(--brown-deep);
 }
 
 .statement em {
   font-weight: 400;
+  color: var(--brown);
 }
 
 .actions {
@@ -44,5 +45,5 @@
   gap: 10px;
   font-size: 13px;
   letter-spacing: 0.1em;
-  color: var(--cream);
+  color: var(--brown-deep);
 }

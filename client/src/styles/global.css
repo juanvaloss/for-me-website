@@ -16,14 +16,14 @@
   --danger: #a4493d;
   --success: #5a6b4a;
 
-  /* The Drop 01 catalog's blurred taupe backdrop: an arch of light over darker edges. */
-  --taupe: #c2b6a5;
+  /* A lighter take on the Drop 01 catalog's backdrop: an arch of light over warm sand. */
+  --taupe: #e6ddd0;
   --drop-gradient:
-    radial-gradient(34% 50% at 38% 30%, rgba(225, 217, 205, 0.95), rgba(225, 217, 205, 0) 72%),
-    radial-gradient(30% 42% at 66% 22%, rgba(214, 206, 193, 0.75), rgba(214, 206, 193, 0) 70%),
-    radial-gradient(60% 70% at 0% 45%, rgba(128, 116, 100, 0.6), rgba(128, 116, 100, 0) 70%),
-    radial-gradient(50% 60% at 100% 60%, rgba(205, 195, 180, 0.5), rgba(205, 195, 180, 0) 70%),
-    linear-gradient(180deg, #a69988 0%, #c3b7a7 32%, #bbae9c 72%, #ab9c89 100%);
+    radial-gradient(36% 52% at 38% 28%, rgba(252, 249, 244, 0.95), rgba(252, 249, 244, 0) 72%),
+    radial-gradient(30% 42% at 68% 22%, rgba(247, 242, 234, 0.8), rgba(247, 242, 234, 0) 70%),
+    radial-gradient(60% 70% at 0% 50%, rgba(205, 192, 174, 0.5), rgba(205, 192, 174, 0) 70%),
+    radial-gradient(50% 60% at 100% 65%, rgba(216, 204, 188, 0.45), rgba(216, 204, 188, 0) 70%),
+    linear-gradient(180deg, #e2d8ca 0%, #ede6dc 35%, #e7dfd2 72%, #dcd0c0 100%);
 
   --font-serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
   --font-sans: "Jost Variable", "Jost", system-ui, -apple-system, sans-serif;
