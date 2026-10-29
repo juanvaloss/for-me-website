@@ -1,0 +1,48 @@
+.closing {
+  padding: clamp(110px, 15vw, 220px) 0;
+  background: var(--drop-gradient);
+  color: var(--cream);
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  text-align: center;
+}
+
+.kicker {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+}
+
+.statement {
+  font-size: clamp(54px, 8.6vw, 136px);
+  font-weight: 300;
+  line-height: 0.96;
+  color: var(--cream);
+}
+
+.statement em {
+  font-weight: 400;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 20px 34px;
+}
+
+.instagram {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: var(--cream);
+}

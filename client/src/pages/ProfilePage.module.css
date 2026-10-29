@@ -1,0 +1,133 @@
+.loading {
+  min-height: 100svh;
+}
+
+.signIn {
+  display: grid;
+  grid-template-columns: 5fr 6fr;
+  align-items: center;
+  gap: clamp(40px, 8vw, 140px);
+  min-height: 100svh;
+  padding-top: calc(var(--header-height) + 48px);
+  padding-bottom: 96px;
+}
+
+.visual {
+  position: relative;
+}
+
+.visualImage {
+  aspect-ratio: 4 / 5.2;
+}
+
+.visualQuote {
+  position: absolute;
+  right: 28px;
+  bottom: 36px;
+  padding: 18px 26px;
+  border-radius: var(--radius);
+  background: var(--cream);
+  box-shadow: var(--shadow-soft);
+  font-family: var(--font-serif);
+  font-size: 24px;
+  color: var(--brown);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 480px;
+}
+
+.title {
+  font-size: clamp(52px, 6.5vw, 96px);
+  font-weight: 300;
+  line-height: 0.95;
+  color: var(--brown-deep);
+}
+
+.title em {
+  font-weight: 400;
+  color: var(--brown);
+}
+
+.lead {
+  margin-bottom: 12px;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.account {
+  max-width: 920px;
+  padding-top: calc(var(--header-height) + clamp(48px, 7vw, 96px));
+  padding-bottom: clamp(96px, 12vw, 160px);
+}
+
+.accountHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+}
+
+.accountHead > div {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.email {
+  color: var(--muted);
+}
+
+.notice {
+  margin-top: 36px;
+  padding: 14px 18px;
+  border-left: 2px solid var(--brown);
+  background: var(--paper);
+  font-size: 14.5px;
+  color: var(--brown-deep);
+}
+
+.tabs {
+  display: flex;
+  gap: 36px;
+  margin: 56px 0 40px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tab {
+  position: relative;
+  padding-bottom: 14px;
+  font-family: var(--font-serif);
+  font-size: 26px;
+  color: var(--muted);
+  transition: color 0.3s;
+}
+
+.activeTab {
+  color: var(--brown-deep);
+}
+
+.underline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1.5px;
+  background: var(--brown);
+}
+
+@media (max-width: 860px) {
+  .signIn {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .visual {
+    display: none;
+  }
+}

@@ -1,0 +1,144 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(43, 33, 28, 0.38);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 61;
+  display: flex;
+  flex-direction: column;
+  width: min(460px, 100vw);
+  background: var(--cream);
+  box-shadow: -30px 0 80px -40px rgba(43, 33, 28, 0.45);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 26px 28px;
+  border-bottom: 1px solid var(--line);
+}
+
+.head h2 {
+  font-size: 32px;
+  font-weight: 400;
+}
+
+.head h2 span {
+  font-size: 0.6em;
+  color: var(--muted);
+}
+
+.empty {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 28px;
+  font-family: var(--font-serif);
+  font-size: 22px;
+  color: var(--muted);
+}
+
+.items {
+  flex: 1;
+  margin: 0;
+  padding: 8px 28px;
+  list-style: none;
+  overflow-y: auto;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 76px 1fr auto;
+  gap: 16px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.thumb {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--tint) 14%, var(--paper));
+  border-radius: var(--radius);
+}
+
+.thumbPhoto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.name {
+  font-family: var(--font-serif);
+  font-size: 19px;
+  line-height: 1.2;
+  color: var(--brown-deep);
+}
+
+.meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.remove {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.lineTotal {
+  font-size: 14px;
+  color: var(--brown-deep);
+}
+
+.foot {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px 28px 28px;
+  border-top: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.subtotal {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-serif);
+  font-size: 22px;
+  color: var(--brown-deep);
+}
+
+.note {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}

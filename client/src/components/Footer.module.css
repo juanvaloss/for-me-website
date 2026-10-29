@@ -1,0 +1,84 @@
+.footer {
+  position: relative;
+  overflow: hidden;
+  background: var(--brown-deep);
+  color: var(--cream);
+  padding-top: clamp(72px, 10vw, 140px);
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 56px;
+}
+
+.tagline {
+  font-family: var(--font-serif);
+  font-size: clamp(40px, 5.5vw, 76px);
+  font-weight: 300;
+  line-height: 1;
+  color: var(--cream);
+}
+
+.columns {
+  display: flex;
+  gap: clamp(40px, 7vw, 110px);
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 14px;
+  color: rgba(241, 238, 231, 0.78);
+}
+
+.column a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.3s;
+}
+
+.column a:hover {
+  color: var(--cream);
+}
+
+.heading {
+  margin-bottom: 6px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 450;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(241, 238, 231, 0.5);
+}
+
+.wordmark {
+  margin-top: clamp(56px, 8vw, 110px);
+  font-family: var(--font-serif);
+  font-size: clamp(120px, 31vw, 470px);
+  line-height: 0.72;
+  letter-spacing: 0.04em;
+  text-align: center;
+  color: rgba(241, 238, 231, 0.08);
+  user-select: none;
+}
+
+.wordmark em {
+  font-weight: 500;
+}
+
+.bottom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 28px;
+  padding-bottom: 28px;
+  border-top: 1px solid rgba(241, 238, 231, 0.12);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: rgba(241, 238, 231, 0.55);
+}

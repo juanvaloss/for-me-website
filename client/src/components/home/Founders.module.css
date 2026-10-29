@@ -1,0 +1,95 @@
+.founders {
+  padding: clamp(40px, 6vw, 80px) 0 clamp(96px, 13vw, 190px);
+}
+
+.intro {
+  display: grid;
+  grid-template-columns: 5fr 6fr;
+  align-items: end;
+  gap: clamp(40px, 7vw, 120px);
+}
+
+.introImage {
+  aspect-ratio: 728 / 926;
+}
+
+.introText {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  padding-bottom: clamp(0px, 4vw, 60px);
+}
+
+.title {
+  font-size: clamp(56px, 7.5vw, 112px);
+  font-weight: 300;
+  line-height: 0.95;
+  color: var(--brown-deep);
+}
+
+.title em {
+  font-weight: 400;
+  color: var(--brown);
+}
+
+.lead {
+  max-width: 440px;
+  font-size: 16.5px;
+  line-height: 1.75;
+  color: var(--muted);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(32px, 8vw, 140px);
+  margin-top: clamp(96px, 12vw, 180px);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.card:nth-child(2) {
+  margin-top: clamp(0px, 14vw, 220px);
+}
+
+.cardImage {
+  aspect-ratio: 4 / 5.2;
+}
+
+.quote {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(22px, 2vw, 28px);
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--brown-deep);
+}
+
+.signature {
+  margin-top: 18px;
+  font-family: var(--font-serif);
+  font-size: 40px;
+  font-style: italic;
+  font-weight: 500;
+  color: var(--brown);
+}
+
+@media (max-width: 860px) {
+  .intro,
+  .cards {
+    grid-template-columns: 1fr;
+  }
+
+  .introImage {
+    width: min(100%, 440px);
+  }
+
+  .card:nth-child(2) {
+    margin-top: 32px;
+  }
+}

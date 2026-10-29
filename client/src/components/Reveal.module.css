@@ -1,0 +1,16 @@
+.masked {
+  display: block;
+}
+
+.line {
+  display: block;
+  overflow: hidden;
+  /* Room for accents on capitals, descenders and italic overhangs inside the mask. */
+  padding: 0.18em 0.08em 0.12em;
+  margin: -0.18em -0.08em -0.12em;
+}
+
+.lineInner {
+  display: block;
+  will-change: transform;
+}

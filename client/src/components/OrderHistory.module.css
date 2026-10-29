@@ -1,0 +1,134 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.order {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 26px 28px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+}
+
+.orderHead,
+.orderFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.reference {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  color: var(--brown-deep);
+}
+
+.date {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.status {
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 10.5px;
+  font-weight: 450;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  background: var(--cream-deep);
+  color: var(--brown-deep);
+}
+
+.confirmed,
+.shipped {
+  background: #e4e6dc;
+  color: var(--olive);
+}
+
+.delivered {
+  background: var(--olive);
+  color: var(--cream);
+}
+
+.cancelled {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+  color: var(--muted);
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 16px 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  font-size: 14.5px;
+}
+
+.items li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.items em {
+  color: var(--muted);
+}
+
+.orderFoot p {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.orderFoot strong {
+  font-weight: 450;
+  color: var(--brown-deep);
+}
+
+.cancel,
+.confirm button {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: var(--danger);
+}
+
+.confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 13px;
+  color: var(--brown-deep);
+}
+
+.confirm button:last-child {
+  color: var(--muted);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  font-family: var(--font-serif);
+  font-size: 24px;
+  color: var(--muted);
+}
+
+.placeholder {
+  height: 220px;
+  border-radius: var(--radius);
+}

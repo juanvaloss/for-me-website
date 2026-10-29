@@ -1,0 +1,243 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.media {
+  position: relative;
+  aspect-ratio: 5 / 6;
+  overflow: hidden;
+  border-radius: var(--radius);
+  /* Matches the studio backdrop of the catalog photos. */
+  background: #e9e7e7;
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.2s var(--ease-out);
+}
+
+.card:hover .photo {
+  transform: scale(1.04);
+}
+
+.art {
+  width: 70%;
+  height: 70%;
+}
+
+.badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 1;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--cream);
+  font-size: 10.5px;
+  font-weight: 450;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brown-deep);
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 18px;
+  padding: 22px 2px 0;
+}
+
+.titleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.category {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.name {
+  margin-top: 4px;
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1.05;
+}
+
+.price {
+  font-family: var(--font-sans);
+  font-size: 17px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--brown);
+}
+
+.price span {
+  font-size: 12px;
+  font-weight: 450;
+  letter-spacing: 0.04em;
+}
+
+.label {
+  margin-bottom: 10px;
+  padding: 0;
+  font-size: 11px;
+  font-weight: 450;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--brown-deep);
+}
+
+.label span {
+  letter-spacing: 0.06em;
+  text-transform: none;
+  color: var(--muted);
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.swatch {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--swatch);
+  box-shadow: inset 0 0 0 1px rgba(43, 33, 28, 0.18);
+  transition: transform 0.3s var(--ease-out);
+}
+
+.swatch:hover {
+  transform: scale(1.12);
+}
+
+.swatchActive {
+  box-shadow:
+    inset 0 0 0 1px rgba(43, 33, 28, 0.18),
+    0 0 0 2px var(--cream),
+    0 0 0 3px var(--brown);
+}
+
+/* A dot under the colors that are in stock right now. */
+.swatchStocked::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--brown);
+  transform: translateX(-50%);
+}
+
+.sizes {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.sizeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.size {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 56px;
+  padding: 9px 10px 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  color: var(--brown-deep);
+  transition:
+    background-color 0.35s var(--ease-out),
+    border-color 0.35s var(--ease-out),
+    color 0.35s var(--ease-out);
+}
+
+.size:hover:not(:disabled) {
+  border-color: var(--brown);
+}
+
+.size:disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
+}
+
+.size:disabled .sizeLabel {
+  text-decoration: line-through;
+}
+
+.selected {
+  border-color: var(--brown);
+  background: var(--brown);
+  color: var(--cream);
+}
+
+.sizeLabel {
+  font-size: 14px;
+  font-weight: 450;
+  letter-spacing: 0.06em;
+}
+
+.sizeStock {
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  opacity: 0.75;
+}
+
+.added {
+  background: var(--success);
+}
+
+.features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0;
+  padding: 14px 0 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.features li {
+  position: relative;
+  padding-left: 11px;
+}
+
+.features li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}

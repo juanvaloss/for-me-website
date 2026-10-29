@@ -1,0 +1,329 @@
+{
+  "stock_counted_at": "2026-10-12",
+  "categories": [
+    {
+      "name": "Sets",
+      "slug": "sets",
+      "products": [
+        {
+          "name": "Set Scoop",
+          "price": "1190.00",
+          "sizes": ["XS", "S", "M", "L", "XL"],
+          "features": ["Compresión ligera que moldea", "Top con soporte medio–alto", "Cintura alta que estiliza", "Tela buttery-soft y transpirable", "Set de 2 piezas"],
+          "colors": [
+            {"name": "Chocolate", "photo": "/products/set-scoop-chocolate.webp", "hex": "#492a23"},
+            {"name": "Sage", "photo": "/products/set-scoop-sage.webp", "hex": "#5a584a"},
+            {"name": "Navy", "photo": "/products/set-scoop-navy.webp", "hex": "#161e2b"},
+            {"name": "Periwinkle", "photo": "/products/set-scoop-periwinkle.webp", "hex": "#36426b"},
+            {"name": "Charcoal", "photo": "/products/set-scoop-charcoal.webp", "hex": "#323137"},
+            {"name": "Pine", "photo": "/products/set-scoop-pine.webp", "hex": "#324243"},
+            {"name": "Mocha", "photo": "/products/set-scoop-mocha.webp", "hex": "#423327"},
+            {"name": "Olive", "photo": "/products/set-scoop-olive.webp", "hex": "#404230"},
+            {"name": "Army green", "photo": "/products/set-scoop-army-green.webp", "hex": "#2d2e11"},
+            {"name": "Black", "photo": "/products/set-scoop-black.webp", "hex": "#1e1d21"},
+            {"name": "Slate blue", "photo": "/products/set-scoop-slate-blue.webp", "hex": "#404a5b"},
+            {"name": "Espresso", "photo": "/products/set-scoop-espresso.webp", "hex": "#3a2522"},
+            {"name": "Brick", "photo": "/products/set-scoop-brick.webp", "hex": "#600b0e"},
+            {"name": "Sky blue", "photo": "/products/set-scoop-sky-blue.webp", "hex": "#78bcdc"},
+            {"name": "Dark olive", "photo": "/products/set-scoop-dark-olive.webp", "hex": "#312620"},
+            {"name": "Cherry", "photo": "/products/set-scoop-cherry.webp", "hex": "#7d0009"}
+          ]
+        },
+        {
+          "name": "Set Cami",
+          "price": "1190.00",
+          "sizes": ["XS", "S", "M", "L", "XL"],
+          "features": ["Compresión ligera que moldea", "Top con soporte medio–alto", "Cintura alta que estiliza", "Tela buttery-soft y transpirable", "Set de 2 piezas"],
+          "colors": [
+            {"name": "Teal", "photo": "/products/set-cami-teal.webp", "hex": "#374e58"},
+            {"name": "Sage", "photo": "/products/set-cami-sage.webp", "hex": "#505047"},
+            {"name": "Turquoise", "photo": "/products/set-cami-turquoise.webp", "hex": "#019fc2"},
+            {"name": "Steel grey", "photo": "/products/set-cami-steel-grey.webp", "hex": "#61606c"},
+            {"name": "Chocolate", "photo": "/products/set-cami-chocolate.webp", "hex": "#362529"},
+            {"name": "Grey", "photo": "/products/set-cami-grey.webp", "hex": "#64585b"},
+            {"name": "Black", "photo": "/products/set-cami-black.webp", "hex": "#0d0d0f"}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Jackets",
+      "slug": "jackets",
+      "products": [
+        {
+          "name": "Jacket clásica",
+          "price": "1090.00",
+          "sizes": ["S", "M", "L", "XL"],
+          "features": ["Fit entallado que define la silueta", "Tela térmica ligera", "Stretch en 4 direcciones", "Ideal para layering"],
+          "colors": [
+            {"name": "Beige", "photo": "/products/jacket-clasica-beige.webp", "hex": "#e4dccd", "stock": {"S": 3, "M": 2}},
+            {"name": "Grey", "photo": "/products/jacket-clasica-grey.webp", "hex": "#55524f", "stock": {"S": 3, "M": 2}},
+            {"name": "Black", "photo": "/products/jacket-clasica-black.webp", "hex": "#0b0a0d", "stock": {"M": 1, "L": 1}},
+            {"name": "White", "photo": "/products/jacket-clasica-white.webp", "hex": "#f2f1ee"}
+          ]
+        },
+        {
+          "name": "Jacket con hood",
+          "price": "1090.00",
+          "sizes": ["S", "M", "L", "XL"],
+          "features": ["Fit entallado que define la silueta", "Tela térmica ligera", "Stretch en 4 direcciones", "Ideal para layering", "Con hood"],
+          "colors": [
+            {"name": "White", "photo": "/products/jacket-con-hood-white.webp", "hex": "#f2f1ee"},
+            {"name": "Black", "photo": "/products/jacket-con-hood-black.webp", "hex": "#1d1c1d"}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Leggings",
+      "slug": "leggings",
+      "products": [
+        {
+          "name": "Leggings Sculpt",
+          "price": "890.00",
+          "sizes": ["XS", "S", "M", "L", "XL"],
+          "features": ["Efecto sculpt", "Cintura alta", "Tela ultra suave"],
+          "colors": [
+            {"name": "Negro", "photo": "/products/leggings-sculpt-negro.webp", "hex": "#100f14", "stock": {"S": 2, "M": 2}},
+            {"name": "Army green", "photo": "/products/leggings-sculpt-army-green.webp", "hex": "#3a3a2b", "stock": {"XS": 1, "S": 2, "M": 1}},
+            {"name": "Night sea", "photo": "/products/leggings-sculpt-night-sea.webp", "hex": "#162843", "stock": {"XS": 1, "S": 3, "M": 1}},
+            {"name": "Purple", "photo": "/products/leggings-sculpt-purple.webp", "hex": "#4e3f48", "stock": {"S": 1}},
+            {"name": "Khaki", "photo": "/products/leggings-sculpt-khaki.webp", "hex": "#423327"},
+            {"name": "Slate blue", "photo": "/products/leggings-sculpt-slate-blue.webp", "hex": "#353f4f"},
+            {"name": "Moss", "photo": "/products/leggings-sculpt-moss.webp", "hex": "#2b2c17"},
+            {"name": "Espresso", "photo": "/products/leggings-sculpt-espresso.webp", "hex": "#332220"},
+            {"name": "Wine", "photo": "/products/leggings-sculpt-wine.webp", "hex": "#66141b"},
+            {"name": "Petrol", "photo": "/products/leggings-sculpt-petrol.webp", "hex": "#20546e"},
+            {"name": "Deep teal", "photo": "/products/leggings-sculpt-deep-teal.webp", "hex": "#133040"},
+            {"name": "Emerald", "photo": "/products/leggings-sculpt-emerald.webp", "hex": "#003725"},
+            {"name": "Plum", "photo": "/products/leggings-sculpt-plum.webp", "hex": "#583446"},
+            {"name": "Slate", "photo": "/products/leggings-sculpt-slate.webp", "hex": "#353d40"},
+            {"name": "Sage", "photo": "/products/leggings-sculpt-sage.webp", "hex": "#3d3c34"},
+            {"name": "Hunter green", "photo": "/products/leggings-sculpt-hunter-green.webp", "hex": "#31433a"}
+          ]
+        },
+        {
+          "name": "Leggings Classic",
+          "price": "890.00",
+          "sizes": ["S", "M", "L", "XL"],
+          "features": ["Efecto sculpt", "Cintura alta", "Tela ultra suave"],
+          "colors": [
+            {"name": "Cinnamon", "photo": "/products/leggings-classic-cinnamon.webp", "hex": "#4e2c23"},
+            {"name": "Sage", "photo": "/products/leggings-classic-sage.webp", "hex": "#4a493e"},
+            {"name": "Navy", "photo": "/products/leggings-classic-navy.webp", "hex": "#151d29"},
+            {"name": "Periwinkle", "photo": "/products/leggings-classic-periwinkle.webp", "hex": "#3d5186"},
+            {"name": "Charcoal", "photo": "/products/leggings-classic-charcoal.webp", "hex": "#2e2f35"},
+            {"name": "Pine", "photo": "/products/leggings-classic-pine.webp", "hex": "#344546"}
+          ]
+        },
+        {
+          "name": "Flare Leggings",
+          "price": "890.00",
+          "sizes": ["S", "M", "L", "XL"],
+          "features": ["Corte flare que alarga visualmente la pierna", "Efecto sculpt", "Cintura alta", "Tela ultra suave"],
+          "colors": [
+            {"name": "Black", "photo": "/products/flare-leggings-black.webp", "hex": "#131214"},
+            {"name": "Espresso", "photo": "/products/flare-leggings-espresso.webp", "hex": "#3f2b2c"},
+            {"name": "Burgundy", "photo": "/products/flare-leggings-burgundy.webp", "hex": "#371c24"},
+            {"name": "Charcoal", "photo": "/products/flare-leggings-charcoal.webp", "hex": "#373233"},
+            {"name": "Navy", "photo": "/products/flare-leggings-navy.webp", "hex": "#1d2a3f"}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Biker shorts",
+      "slug": "biker-shorts",
+      "products": [
+        {
+          "name": "Biker shorts con bolsillos",
+          "price": "690.00",
+          "sizes": ["S", "M", "L", "XL"],
+          "features": ["Con bolsillos", "Compresión favorecedora", "No transparenta", "Se mantiene en su lugar", "Perfectos para entrenar o usar diario"],
+          "colors": [
+            {"name": "Black", "photo": "/products/biker-shorts-con-bolsillos-black.webp", "hex": "#171618", "stock": {"S": 3, "M": 2}},
+            {"name": "Espresso", "photo": "/products/biker-shorts-con-bolsillos-espresso.webp", "hex": "#523531", "stock": {"S": 2, "M": 1}},
+            {"name": "Charcoal", "photo": "/products/biker-shorts-con-bolsillos-charcoal.webp", "hex": "#434245"},
+            {"name": "Navy", "photo": "/products/biker-shorts-con-bolsillos-navy.webp", "hex": "#212e41"},
+            {"name": "Wine", "photo": "/products/biker-shorts-con-bolsillos-wine.webp", "hex": "#3a1b23"},
+            {"name": "Taupe", "photo": "/products/biker-shorts-con-bolsillos-taupe.webp", "hex": "#9a8573"},
+            {"name": "Sage", "photo": "/products/biker-shorts-con-bolsillos-sage.webp", "hex": "#a19f8e"},
+            {"name": "Royal blue", "photo": "/products/biker-shorts-con-bolsillos-royal-blue.webp", "hex": "#2574d8"},
+            {"name": "Eucalyptus", "photo": "/products/biker-shorts-con-bolsillos-eucalyptus.webp", "hex": "#62736b"}
+          ]
+        },
+        {
+          "name": "Biker shorts cintura alta",
+          "price": "690.00",
+          "sizes": ["S", "M", "L", "XL"],
+          "features": ["Compresión suave que favorece la silueta", "Cintura alta para mayor soporte", "Tela flexible que se mueve contigo", "Ajuste cómodo que se mantiene en su lugar"],
+          "colors": [
+            {"name": "Forest green", "photo": "/products/biker-shorts-cintura-alta-forest-green.webp", "hex": "#1e372b"},
+            {"name": "Powder blue", "photo": "/products/biker-shorts-cintura-alta-powder-blue.webp", "hex": "#6b7f9d"},
+            {"name": "Charcoal", "photo": "/products/biker-shorts-cintura-alta-charcoal.webp", "hex": "#48474b"},
+            {"name": "Navy", "photo": "/products/biker-shorts-cintura-alta-navy.webp", "hex": "#191e36"},
+            {"name": "Espresso", "photo": "/products/biker-shorts-cintura-alta-espresso.webp", "hex": "#2c1f1f"},
+            {"name": "Olive", "photo": "/products/biker-shorts-cintura-alta-olive.webp", "hex": "#848276"},
+            {"name": "Slate blue", "photo": "/products/biker-shorts-cintura-alta-slate-blue.webp", "hex": "#626871"},
+            {"name": "Plum", "photo": "/products/biker-shorts-cintura-alta-plum.webp", "hex": "#4b213b"},
+            {"name": "Eucalyptus", "photo": "/products/biker-shorts-cintura-alta-eucalyptus.webp", "hex": "#48635b"},
+            {"name": "Royal blue", "photo": "/products/biker-shorts-cintura-alta-royal-blue.webp", "hex": "#085bc2"},
+            {"name": "Rust", "photo": "/products/biker-shorts-cintura-alta-rust.webp", "hex": "#a3532f"}
+          ]
+        },
+        {
+          "name": "Biker shorts cortos",
+          "price": "690.00",
+          "sizes": ["XS", "S", "M", "L", "XL"],
+          "features": ["Compresión suave que favorece la silueta", "Cintura alta para mayor soporte", "Tela flexible que se mueve contigo", "Ajuste cómodo que se mantiene en su lugar"],
+          "colors": [
+            {"name": "Black", "photo": "/products/biker-shorts-cortos-black.webp", "hex": "#100f14"},
+            {"name": "Navy", "photo": "/products/biker-shorts-cortos-navy.webp", "hex": "#141f34"},
+            {"name": "Charcoal", "photo": "/products/biker-shorts-cortos-charcoal.webp", "hex": "#414043"},
+            {"name": "Sage", "photo": "/products/biker-shorts-cortos-sage.webp", "hex": "#7f7d6a"},
+            {"name": "Eucalyptus", "photo": "/products/biker-shorts-cortos-eucalyptus.webp", "hex": "#6d7779"},
+            {"name": "Raspberry", "photo": "/products/biker-shorts-cortos-raspberry.webp", "hex": "#a54a62"},
+            {"name": "Denim", "photo": "/products/biker-shorts-cortos-denim.webp", "hex": "#4e5e80"},
+            {"name": "Plum", "photo": "/products/biker-shorts-cortos-plum.webp", "hex": "#694554"},
+            {"name": "Periwinkle", "photo": "/products/biker-shorts-cortos-periwinkle.webp", "hex": "#a2a0dd"},
+            {"name": "Wine", "photo": "/products/biker-shorts-cortos-wine.webp", "hex": "#3d081b"},
+            {"name": "Espresso", "photo": "/products/biker-shorts-cortos-espresso.webp", "hex": "#2b1e1e"},
+            {"name": "Slate", "photo": "/products/biker-shorts-cortos-slate.webp", "hex": "#4f5762"},
+            {"name": "Jade", "photo": "/products/biker-shorts-cortos-jade.webp", "hex": "#657a72"},
+            {"name": "Royal blue", "photo": "/products/biker-shorts-cortos-royal-blue.webp", "hex": "#2e7ddf"},
+            {"name": "Forest green", "photo": "/products/biker-shorts-cortos-forest-green.webp", "hex": "#2c4839"},
+            {"name": "Mauve", "photo": "/products/biker-shorts-cortos-mauve.webp", "hex": "#a8838a"},
+            {"name": "Grey", "photo": "/products/biker-shorts-cortos-grey.webp", "hex": "#9a99a0"}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Faldas",
+      "slug": "skirts",
+      "products": [
+        {
+          "name": "Falda tennis",
+          "price": "690.00",
+          "sizes": ["XS", "S", "M", "L", "XL"],
+          "features": ["Short interno integrado", "Cómoda y favorecedora", "Movimiento natural", "Ideal para tennis"],
+          "colors": [
+            {"name": "Rosa", "photo": "/products/falda-tennis-rosa.webp", "hex": "#f1d3db", "stock": {"S": 3, "M": 1}},
+            {"name": "Pearl yellow", "photo": "/products/falda-tennis-pearl-yellow.webp", "hex": "#f0e8cc", "stock": {"S": 3, "M": 1}},
+            {"name": "Black", "photo": "/products/falda-tennis-black.webp", "hex": "#2b292a", "stock": {"S": 1}},
+            {"name": "Lila", "photo": "/products/falda-tennis-lila.webp", "hex": "#ddcfe0", "stock": {"S": 1}},
+            {"name": "White", "photo": "/products/falda-tennis-white.webp", "hex": "#f2f2f0"},
+            {"name": "Violet", "photo": "/products/falda-tennis-violet.webp", "hex": "#87799c"},
+            {"name": "Orchid", "photo": "/products/falda-tennis-orchid.webp", "hex": "#c584c4"},
+            {"name": "Mint", "photo": "/products/falda-tennis-mint.webp", "hex": "#b6d3cf"},
+            {"name": "Petrol", "photo": "/products/falda-tennis-petrol.webp", "hex": "#62a3bd"},
+            {"name": "Lilac grey", "photo": "/products/falda-tennis-lilac-grey.webp", "hex": "#cbc6cf"}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Shorts",
+      "slug": "shorts",
+      "products": [
+        {
+          "name": "Running shorts",
+          "price": "690.00",
+          "sizes": ["S", "M", "L", "XL"],
+          "features": ["Silueta relajada y favorecedora", "Sensación ligera", "Movimiento sin esfuerzo"],
+          "colors": [
+            {"name": "Black", "photo": "/products/running-shorts-black.webp", "hex": "#201f22"},
+            {"name": "White", "photo": "/products/running-shorts-white.webp", "hex": "#f3f3f1"},
+            {"name": "Butter", "photo": "/products/running-shorts-butter.webp", "hex": "#ede4c4"},
+            {"name": "Baby blue", "photo": "/products/running-shorts-baby-blue.webp", "hex": "#c9d6ec"},
+            {"name": "Taupe", "photo": "/products/running-shorts-taupe.webp", "hex": "#8d8679"},
+            {"name": "Blush", "photo": "/products/running-shorts-blush.webp", "hex": "#ebcdd0"},
+            {"name": "Sage", "photo": "/products/running-shorts-sage.webp", "hex": "#cfd8c6"}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tops",
+      "slug": "tops",
+      "products": [
+        {
+          "name": "Top halter",
+          "price": "690.00",
+          "sizes": ["S", "M", "L", "XL"],
+          "features": ["Tela suave y transpirable", "Soporte cómodo para tu movimiento", "Silueta que realza tu forma natural", "Copas incluidas"],
+          "colors": [
+            {"name": "Black", "photo": "/products/top-halter-black.webp", "hex": "#0d0d10", "stock": {"S": 4, "M": 2}},
+            {"name": "Espresso", "photo": "/products/top-halter-espresso.webp", "hex": "#341214"},
+            {"name": "Lavender", "photo": "/products/top-halter-lavender.webp", "hex": "#a99bdc"}
+          ]
+        },
+        {
+          "name": "Top racerback",
+          "price": "690.00",
+          "sizes": ["S", "M", "L", "XL"],
+          "features": ["Soporte medio-alto", "Tela suave y transpirable", "Soporte cómodo para tu movimiento", "Copas incluidas"],
+          "colors": [
+            {"name": "White", "photo": "/products/top-racerback-white.webp", "hex": "#ece8dc", "stock": {"S": 3, "M": 1}},
+            {"name": "Pink", "photo": "", "hex": "#eec3cb", "stock": {"S": 3, "M": 1}},
+            {"name": "Black", "photo": "/products/top-racerback-black.webp", "hex": "#151416"},
+            {"name": "Mocha", "photo": "/products/top-racerback-mocha.webp", "hex": "#7a5643"},
+            {"name": "Slate violet", "photo": "/products/top-racerback-slate-violet.webp", "hex": "#6f657f"}
+          ]
+        },
+        {
+          "name": "Top halter V",
+          "price": "690.00",
+          "sizes": ["S", "M", "L", "XL"],
+          "features": ["Silueta que realza tu forma natural", "Comodidad que se adapta a tu día", "Soporte medio-alto", "Diseño limpio y versátil", "Copas incluidas"],
+          "colors": [
+            {"name": "Negro", "photo": "/products/top-halter-v-negro.webp", "hex": "#303030", "stock": {"S": 1}},
+            {"name": "Navy", "photo": "/products/top-halter-v-navy.webp", "hex": "#2a2c3c"},
+            {"name": "Wine", "photo": "/products/top-halter-v-wine.webp", "hex": "#762732"},
+            {"name": "Baby blue", "photo": "/products/top-halter-v-baby-blue.webp", "hex": "#bfd2ea"},
+            {"name": "Mauve", "photo": "/products/top-halter-v-mauve.webp", "hex": "#a6857d"},
+            {"name": "Pink", "photo": "/products/top-halter-v-pink.webp", "hex": "#f2c8d5"},
+            {"name": "Ivory", "photo": "/products/top-halter-v-ivory.webp", "hex": "#ede8de"},
+            {"name": "Beige", "photo": "/products/top-halter-v-beige.webp", "hex": "#d8c6af"}
+          ]
+        },
+        {
+          "name": "Top halter corazón",
+          "price": "690.00",
+          "sizes": ["S", "M", "L", "XL"],
+          "features": ["Soporte suave con ajuste seguro", "Silueta que realza tu forma natural", "Sensación ligera sobre la piel", "Balance perfecto entre comfort y estilo", "Copas incluidas"],
+          "colors": [
+            {"name": "Pink", "photo": "/products/top-halter-corazon-pink.webp", "hex": "#f2c8d5"},
+            {"name": "Ivory", "photo": "/products/top-halter-corazon-ivory.webp", "hex": "#ede8de"},
+            {"name": "Baby blue", "photo": "/products/top-halter-corazon-baby-blue.webp", "hex": "#bfd2ea"},
+            {"name": "Black", "photo": "/products/top-halter-corazon-black.webp", "hex": "#2a2a2a"},
+            {"name": "Beige", "photo": "/products/top-halter-corazon-beige.webp", "hex": "#d8c6af"}
+          ]
+        },
+        {
+          "name": "Top cross back",
+          "price": "690.00",
+          "sizes": ["S", "M", "L", "XL"],
+          "features": ["Soporte medio-alto", "Tela suave y transpirable", "Soporte cómodo para tu movimiento", "Copas incluidas"],
+          "colors": [
+            {"name": "White", "photo": "/products/top-cross-back-white.webp", "hex": "#f1f0ec"},
+            {"name": "Black", "photo": "/products/top-cross-back-black.webp", "hex": "#1a191c"},
+            {"name": "Taupe", "photo": "/products/top-cross-back-taupe.webp", "hex": "#a48c76"},
+            {"name": "Olive", "photo": "/products/top-cross-back-olive.webp", "hex": "#58534b"}
+          ]
+        },
+        {
+          "name": "Crop top",
+          "price": "690.00",
+          "sizes": ["S", "M", "L", "XL"],
+          "features": ["Tela suave y transpirable", "Soporte cómodo para tu movimiento", "Silueta que realza tu forma natural", "Copas incluidas"],
+          "colors": [
+            {"name": "Black", "photo": "/products/crop-top-black.webp", "hex": "#110f12"},
+            {"name": "Slate", "photo": "/products/crop-top-slate.webp", "hex": "#6a808a"},
+            {"name": "Aqua", "photo": "/products/crop-top-aqua.webp", "hex": "#cfe6e6"}
+          ]
+        }
+      ]
+    }
+  ]
+}

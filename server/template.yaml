@@ -1,0 +1,168 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  forme API - Django REST Framework on AWS Lambda behind a Function URL, with an
+  Aurora Serverless v2 PostgreSQL cluster that pauses itself when idle.
+
+Parameters:
+  SecretKey:
+    Type: String
+    NoEcho: true
+    MinLength: 50
+    Description: Django SECRET_KEY.
+  DatabasePassword:
+    Type: String
+    NoEcho: true
+    AllowedPattern: "[A-Za-z0-9]{20,64}"
+    ConstraintDescription: 20 to 64 letters and digits.
+  OriginVerifySecret:
+    Type: String
+    NoEcho: true
+    AllowedPattern: "[A-Za-z0-9]{32,128}"
+    ConstraintDescription: 32 to 128 letters and digits.
+    Description: Shared secret CloudFront sends in X-Origin-Verify.
+  SiteUrl:
+    Type: String
+    Default: http://localhost:5173
+    Description: Public storefront URL (CloudFront domain or custom domain).
+  DatabaseEngineVersion:
+    Type: String
+    Default: "16.6"
+    Description: Aurora PostgreSQL version. Scaling to zero needs 16.3+, 15.7+, 14.12+ or 13.15+.
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Architectures: [arm64]
+    MemorySize: 512
+    CodeUri: .
+    VpcConfig:
+      SecurityGroupIds: [!Ref ApiSecurityGroup]
+      SubnetIds: [!Ref PrivateSubnetA, !Ref PrivateSubnetB]
+    Environment:
+      Variables:
+        DJANGO_SETTINGS_MODULE: service.settings
+        ENVIRON: prod
+        SECRET_KEY: !Ref SecretKey
+        DATABASE_URL: !Sub "postgres://forme:${DatabasePassword}@${DatabaseCluster.Endpoint.Address}:${DatabaseCluster.Endpoint.Port}/forme"
+        ALLOWED_HOSTS: !Sub ".lambda-url.${AWS::Region}.on.aws"
+        SITE_URL: !Ref SiteUrl
+        ORIGIN_VERIFY_SECRET: !Ref OriginVerifySecret
+
+Resources:
+  # Private subnets only: the functions never need the internet, so there is no
+  # NAT gateway (it would cost more than everything else combined).
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.20.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Ref AWS::StackName
+
+  PrivateSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.20.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs ""]
+
+  PrivateSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.20.2.0/24
+      AvailabilityZone: !Select [1, !GetAZs ""]
+
+  ApiSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: forme API functions
+      VpcId: !Ref Vpc
+
+  DatabaseSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: forme Aurora cluster, reachable only from the API functions
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref ApiSecurityGroup
+
+  DatabaseSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: forme Aurora subnets
+      SubnetIds: [!Ref PrivateSubnetA, !Ref PrivateSubnetB]
+
+  DatabaseCluster:
+    Type: AWS::RDS::DBCluster
+    DeletionPolicy: Snapshot
+    UpdateReplacePolicy: Snapshot
+    Properties:
+      Engine: aurora-postgresql
+      EngineVersion: !Ref DatabaseEngineVersion
+      DatabaseName: forme
+      MasterUsername: forme
+      MasterUserPassword: !Ref DatabasePassword
+      DBSubnetGroupName: !Ref DatabaseSubnetGroup
+      VpcSecurityGroupIds: [!Ref DatabaseSecurityGroup]
+      StorageEncrypted: true
+      BackupRetentionPeriod: 7
+      ServerlessV2ScalingConfiguration:
+        MinCapacity: 0
+        MaxCapacity: 2
+        SecondsUntilAutoPause: 300
+
+  DatabaseInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      Engine: aurora-postgresql
+      DBClusterIdentifier: !Ref DatabaseCluster
+      DBInstanceClass: db.serverless
+      PubliclyAccessible: false
+
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      Description: forme storefront API (served through CloudFront)
+      Handler: service.lambda_handler.handler
+      # Leaves room for a paused Aurora cluster to resume (~15 s).
+      Timeout: 30
+      FunctionUrlConfig:
+        AuthType: NONE
+
+  ManageFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      Description: Runs Django management commands; only invocable with IAM credentials
+      Handler: service.lambda_handler.manage
+      Timeout: 300
+
+  ApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${ApiFunction}
+      RetentionInDays: 14
+
+  ManageLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${ManageFunction}
+      RetentionInDays: 14
+
+Outputs:
+  ApiDomain:
+    Description: Function URL host, used as the CloudFront origin for /api/*.
+    Value: !Select [2, !Split ["/", !GetAtt ApiFunctionUrl.FunctionUrl]]
+  ManageFunctionName:
+    Description: 'Invoke with {"command": [...]} to run management commands.'
+    Value: !Ref ManageFunction

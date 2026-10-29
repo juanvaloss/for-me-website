@@ -1,0 +1,56 @@
+.logo {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  color: var(--brown);
+}
+
+.kicker {
+  font-family: var(--font-sans);
+  font-size: 0.42em;
+  letter-spacing: 0.55em;
+  text-transform: lowercase;
+  margin-right: -0.55em;
+  margin-bottom: 0.25em;
+  opacity: 0.85;
+}
+
+.word {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+}
+
+.word em {
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.tagline {
+  margin-top: 0.6em;
+  font-family: var(--font-serif);
+  font-size: 0.32em;
+  letter-spacing: 0.32em;
+}
+
+.sm {
+  font-size: 30px;
+}
+
+.sm .kicker {
+  font-size: 7px;
+  letter-spacing: 0.6em;
+}
+
+.lg {
+  font-size: clamp(64px, 10vw, 140px);
+}
+
+.lg .kicker {
+  font-size: clamp(9px, 1vw, 13px);
+}
+
+.lg .tagline {
+  font-size: clamp(12px, 1.3vw, 18px);
+}

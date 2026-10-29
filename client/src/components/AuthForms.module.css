@@ -1,0 +1,33 @@
+.auth {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.tabs {
+  display: flex;
+  gap: 32px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tab {
+  position: relative;
+  padding: 0 0 14px;
+  font-family: var(--font-serif);
+  font-size: 26px;
+  color: var(--muted);
+  transition: color 0.3s;
+}
+
+.activeTab {
+  color: var(--brown-deep);
+}
+
+.underline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1.5px;
+  background: var(--brown);
+}
