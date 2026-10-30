@@ -1,0 +1,4 @@
+# Scripts that run in bash or inside the Linux build container need LF endings,
+# even on Windows checkouts with core.autocrlf enabled.
+*.sh text eol=lf
+Makefile text eol=lf

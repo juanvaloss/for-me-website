@@ -85,8 +85,11 @@ cd client && npm run lint && npm run build
 
 ## Deploying to AWS
 
-Requirements: AWS CLI (configured), SAM CLI and Docker (SAM builds the Lambda
-package inside the Lambda build image).
+Step-by-step guide, from creating the AWS account to troubleshooting (in
+Spanish): [DEPLOY.md](DEPLOY.md).
+
+Requirements: AWS CLI (configured), a recent SAM CLI and Docker (SAM builds the
+Lambda package inside the Lambda build image).
 
 ```bash
 SEED_CATALOG=1 ./scripts/deploy.sh   # first deploy: also loads the catalog
