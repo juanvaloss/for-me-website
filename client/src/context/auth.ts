@@ -11,6 +11,7 @@ export interface AuthContextValue {
   user: Profile | null;
   isReady: boolean;
   login: (payload: LoginPayload) => Promise<Profile>;
+  loginWithGoogle: (credential: string) => Promise<Profile>;
   register: (payload: RegisterPayload) => Promise<Profile>;
   logout: () => Promise<void>;
   updateProfile: (payload: ProfileUpdate) => Promise<Profile>;

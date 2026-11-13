@@ -8,7 +8,8 @@ activewear brand from Guadalajara (_Your form. Your way._).
 - **Catalog** of the 18 Drop 01 styles: real photos per color, live stock per
   color and size, filters and a shopping bag. Colors without stock link to an
   Instagram DM, matching the catalog's "pedidos y disponibilidad por DM".
-- **Profile** with secure sign-up / sign-in, shipping details and order history.
+- **Profile** with secure sign-up / sign-in (email and password, or "Continue
+  with Google"), shipping details and order history.
 - **Checkout** that reserves stock atomically; payment and delivery are then
   arranged by Instagram DM, the way the brand already sells.
 - **Django admin** (`/api/admin/`) for the founders to manage stock, prices and
@@ -42,6 +43,9 @@ possible:
   - `api`: endpoints only (serializers, viewsets, permissions, error format).
 - CloudFront serves the site and the API from one domain, so the session and
   CSRF cookies are first-party and no CORS is needed.
+- **CI/CD**: `.github/workflows/ci-cd.yml` runs the checks on every pull request
+  and push, and deploys pushes to `main`. GitHub gets short-lived AWS credentials
+  through OIDC (`infra/github-deploy-role.yaml`), so no AWS keys live in GitHub.
 
 ### Security
 
@@ -50,6 +54,13 @@ possible:
 - Argon2 password hashing and Django's password validators.
 - Login and registration are rate limited per client IP. CloudFront supplies
   the IP, so it can't be spoofed.
+- "Continue with Google" checks each ID token's signature, audience, issuer and
+  expiry. The API has no internet access, so a scheduled function copies Google's
+  public keys to S3 every hour, readable only from the API's VPC. An existing
+  account is only linked when Google hosts the mailbox (Gmail or Workspace), and
+  linking drops its unverified password. Staff accounts never open with Google.
+- Deploy secrets are SecureStrings in SSM Parameter Store, created on the first
+  deploy and masked in the workflow logs.
 - The Lambda URL rejects any request without CloudFront's secret header. The
   database sits in private subnets with no route to the internet, and its
   storage is encrypted.
@@ -70,6 +81,9 @@ python manage.py seed_catalog                 # stock count from 12-oct-2026
 python manage.py create_staff_user --email you@example.com --password '...'
 python manage.py runserver
 
+# Optional "Continue with Google": put the web client ID in server/.env
+# (GOOGLE_CLIENT_ID) and client/.env.local (VITE_GOOGLE_CLIENT_ID).
+
 # Storefront → http://localhost:5173 (proxies /api to the API)
 cd client
 npm install
@@ -85,20 +99,25 @@ cd client && npm run lint && npm run build
 
 ## Deploying to AWS
 
-Step-by-step guide, from creating the AWS account to troubleshooting (in
-Spanish): [DEPLOY.md](DEPLOY.md).
+Step-by-step guide, from creating the AWS account to CI/CD and troubleshooting
+(in Spanish): [DEPLOY.md](DEPLOY.md).
 
-Requirements: AWS CLI (configured), a recent SAM CLI and Docker (SAM builds the
-Lambda package inside the Lambda build image).
+In short: create the `infra/github-deploy-role.yaml` stack once, save its
+`RoleArn` output as the `AWS_ROLE_ARN` repository variable (plus `AWS_REGION`
+and, optionally, `GOOGLE_CLIENT_ID`), and every push to `main` deploys. For the
+first deploy, run the workflow by hand with "Load the Drop 01 catalog" checked.
+
+`scripts/deploy.sh` does the work, on GitHub's runner or locally (AWS CLI, a
+recent SAM CLI and Docker):
 
 ```bash
 SEED_CATALOG=1 ./scripts/deploy.sh   # first deploy: also loads the catalog
 ./scripts/deploy.sh                  # later deploys
 ```
 
-The script creates the secrets once (`.deploy-secrets`, gitignored), deploys
-the API stack, runs the migrations, deploys the storefront stack and uploads the
-build. Then create the admin user:
+The script creates the secrets once (SSM Parameter Store), deploys the API
+stack, runs the migrations, copies Google's sign-in keys, deploys the storefront
+stack and uploads the build. Then create the admin user:
 
 ```bash
 aws lambda invoke --function-name <ManageFunctionName output> \
@@ -118,6 +137,8 @@ first deploy. After that, manage stock in the admin.
 | Lambda | $0 within the always-free tier (1M requests, 400k GB-s) |
 | Aurora Serverless v2 | $0 while paused; ~$0.06/h while awake (0.5 ACU) + $0.10/GB-month storage |
 | CloudWatch Logs | cents (14-day retention) |
+| Google sign-in keys (hourly Lambda, EventBridge, S3 gateway endpoint) | $0 |
+| GitHub Actions (checks and deploys) | $0 for public repositories |
 
 The design leaves out NAT gateways, API Gateway, load balancers and Secrets
 Manager, which are usually the hidden monthly costs. A small store should land
@@ -140,6 +161,7 @@ the storefront translates `code` into Spanish.
 | GET | `/api/v1/auth/session/` | public | Current user (or `null`) + CSRF cookie |
 | POST | `/api/v1/auth/register/` | public, throttled | Create account and start a session |
 | POST | `/api/v1/auth/login/` | public, throttled | Start a session |
+| POST | `/api/v1/auth/google/` | public, throttled | Start a session with a Google ID token (creates the account on first use) |
 | POST | `/api/v1/auth/logout/` | session | End the session |
 | GET, PATCH | `/api/v1/me/` | session | Profile and shipping details |
 | GET | `/api/v1/categories/` | public | Categories with product and stock counts |

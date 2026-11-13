@@ -1,0 +1,92 @@
+name: CI/CD
+
+# Pull requests run the checks; pushes to main run them and then deploy to AWS.
+on:
+  pull_request:
+  push:
+    branches: [main]
+    paths-ignore: ["**.md", "Artifacts/**"]
+  workflow_dispatch:
+    inputs:
+      seed_catalog:
+        description: Load the Drop 01 catalog (first deploy only; it overwrites stock)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  server:
+    name: API checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: server/requirements/*.txt
+      - run: pip install -r dev-requirements.txt
+      - run: black --check .
+      - run: flake8
+      - run: python -m pytest
+
+  client:
+    name: Storefront checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+  deploy:
+    name: Deploy to AWS
+    needs: [server, client]
+    # Main only, and skipped until the AWS role exists (see DEPLOY.md).
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.AWS_ROLE_ARN != ''
+    runs-on: ubuntu-latest
+    # The first deploy creates the database and the CDN, which takes a while.
+    timeout-minutes: 90
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      # Short-lived AWS credentials through OIDC; no AWS keys are stored in GitHub.
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+      - uses: aws-actions/setup-sam@v3
+        with:
+          use-installer: true
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+          role-duration-seconds: 7200
+      - name: Deploy
+        run: bash scripts/deploy.sh
+        env:
+          GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+          SEED_CATALOG: ${{ inputs.seed_catalog && '1' || '0' }}

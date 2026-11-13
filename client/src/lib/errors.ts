@@ -4,6 +4,11 @@ import { ApiError } from "../api/http";
 const MESSAGES: Record<string, string> = {
   email_taken: "Ya existe una cuenta con este correo.",
   invalid_credentials: "Correo o contraseña incorrectos.",
+  invalid_google_token: "No pudimos confirmar tu cuenta de Google. Intenta de nuevo.",
+  account_exists: "Ya tienes una cuenta con este correo. Entra con tu contraseña.",
+  account_disabled: "Esta cuenta está desactivada. Escríbenos por Instagram.",
+  google_unavailable:
+    "Entrar con Google no está disponible en este momento. Usa tu correo y contraseña.",
   password_too_short: "La contraseña debe tener al menos 8 caracteres.",
   password_too_common: "Esa contraseña es muy común, elige otra.",
   password_entirely_numeric: "La contraseña no puede tener solo números.",

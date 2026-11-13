@@ -1,10 +1,17 @@
+from django.test import override_settings
 from rest_framework.test import APIClient, APITestCase
 
+from accounts.tests.data.google_tokens import (
+    CLIENT_ID,
+    make_id_token,
+    serve_google_keys,
+)
 from api import models
 from api.tests.data.common_setup import CommonSetup
 
 REGISTER_URL = "/api/v1/auth/register/"
 LOGIN_URL = "/api/v1/auth/login/"
+GOOGLE_URL = "/api/v1/auth/google/"
 LOGOUT_URL = "/api/v1/auth/logout/"
 SESSION_URL = "/api/v1/auth/session/"
 ME_URL = "/api/v1/me/"
@@ -138,6 +145,58 @@ class AuthViewSetTests(CommonSetup, APITestCase):
 
         assert response.status_code == 204
         assert self.client.get(ME_URL).status_code == 403
+
+
+@override_settings(GOOGLE_CLIENT_ID=CLIENT_ID)
+class GoogleSignInViewTests(CommonSetup, APITestCase):
+    def setUp(self):
+        super().setUp()
+        serve_google_keys(self)
+
+    def test_google_sign_in_creates_customer_and_starts_session(self):
+        response = self.client.post(
+            GOOGLE_URL, {"credential": make_id_token()}, format="json"
+        )
+
+        assert response.status_code == 200
+        assert response.data["email"] == "ana.garcia@gmail.com"
+        assert response.data["has_shipping_details"] is False
+        assert self.client.get(ME_URL).status_code == 200
+
+    def test_google_sign_in_with_invalid_token_returns_code(self):
+        response = self.client.post(
+            GOOGLE_URL, {"credential": make_id_token(aud="another-app")}, format="json"
+        )
+
+        assert response.status_code == 400
+        error = response.data["fields"]["non_field_errors"][0]
+        assert error["code"] == "invalid_google_token"
+
+    def test_google_sign_in_into_password_account_returns_account_exists(self):
+        token = make_id_token(email=self.customer.email)
+
+        response = self.client.post(GOOGLE_URL, {"credential": token}, format="json")
+
+        assert response.status_code == 409
+        assert response.data["code"] == "account_exists"
+
+    def test_google_sign_in_without_csrf_token_is_rejected(self):
+        client = APIClient(enforce_csrf_checks=True)
+
+        response = client.post(
+            GOOGLE_URL, {"credential": make_id_token()}, format="json"
+        )
+
+        assert response.status_code == 403
+
+    @override_settings(GOOGLE_CLIENT_ID="")
+    def test_google_sign_in_is_unavailable_without_client_id(self):
+        response = self.client.post(
+            GOOGLE_URL, {"credential": make_id_token()}, format="json"
+        )
+
+        assert response.status_code == 503
+        assert response.data["code"] == "google_unavailable"
 
 
 class ProfileViewTests(CommonSetup, APITestCase):

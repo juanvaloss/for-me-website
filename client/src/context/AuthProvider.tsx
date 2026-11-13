@@ -24,6 +24,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(profile);
         return profile;
       },
+      loginWithGoogle: async (credential) => {
+        const profile = await api.googleLogin(credential);
+        setUser(profile);
+        return profile;
+      },
       register: async (payload) => {
         const profile = await api.register(payload);
         setUser(profile);

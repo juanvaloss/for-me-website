@@ -9,8 +9,9 @@ class UserAdmin(BaseUserAdmin):
     ordering = ["email"]
     list_display = ["email", "first_name", "last_name", "phone", "date_joined"]
     search_fields = ["email", "first_name", "last_name", "phone"]
+    readonly_fields = ["google_sub"]
     fieldsets = [
-        (None, {"fields": ["email", "password"]}),
+        (None, {"fields": ["email", "password", "google_sub"]}),
         ("Personal info", {"fields": ["first_name", "last_name", "phone"]}),
         (
             "Shipping",

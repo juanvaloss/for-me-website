@@ -1,31 +1,47 @@
 #!/usr/bin/env bash
 # Deploys both services: the API stack (server/) and the storefront stack (client/).
-# Requires the AWS CLI, the SAM CLI and Docker. Safe to re-run for updates.
+# GitHub Actions runs it on every push to main (.github/workflows/ci-cd.yml); it
+# also runs locally with the AWS CLI, the SAM CLI and Docker. Safe to re-run.
 #
-#   ./scripts/deploy.sh                  # deploy / update everything
-#   SEED_CATALOG=1 ./scripts/deploy.sh   # also load server/store/data/catalog.json
+#   ./scripts/deploy.sh                          # deploy / update everything
+#   SEED_CATALOG=1 ./scripts/deploy.sh           # also load server/store/data/catalog.json
+#   GOOGLE_CLIENT_ID=... ./scripts/deploy.sh     # turn on "Sign in with Google"
 set -euo pipefail
 
 REGION="${AWS_REGION:-us-east-1}"
 API_STACK="${API_STACK:-forme-api}"
 WEB_STACK="${WEB_STACK:-forme-web}"
+GOOGLE_CLIENT_ID="${GOOGLE_CLIENT_ID:-}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SECRETS_FILE="$ROOT/.deploy-secrets"
 
 random_token() {
   python -c "import secrets, string; print(''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range($1)))"
 }
 
-if [ ! -f "$SECRETS_FILE" ]; then
-  {
-    echo "SECRET_KEY=$(random_token 64)"
-    echo "DATABASE_PASSWORD=$(random_token 32)"
-    echo "ORIGIN_VERIFY_SECRET=$(random_token 48)"
-  } > "$SECRETS_FILE"
-  echo "Generated $SECRETS_FILE (gitignored). Keep a safe copy of it."
+# Secrets live in SSM Parameter Store as SecureStrings (free). The first deploy
+# creates them, so every later deploy, local or from GitHub, reuses the same ones.
+secret() {
+  local name="/$API_STACK/$1" value
+  value="$(aws ssm get-parameter --region "$REGION" --name "$name" --with-decryption \
+    --query Parameter.Value --output text 2>/dev/null || true)"
+  if [ -z "$value" ]; then
+    value="$(random_token "$2")"
+    # Fails if the parameter exists after all, so a secret is never replaced.
+    aws ssm put-parameter --region "$REGION" --name "$name" --type SecureString \
+      --value "$value" > /dev/null || return 1
+  fi
+  printf '%s' "$value"
+}
+
+SECRET_KEY="$(secret secret-key 64)"
+DATABASE_PASSWORD="$(secret database-password 32)"
+ORIGIN_VERIFY_SECRET="$(secret origin-verify-secret 48)"
+if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
+  # Workflow logs of a public repository are public too.
+  for value in "$SECRET_KEY" "$DATABASE_PASSWORD" "$ORIGIN_VERIFY_SECRET"; do
+    echo "::add-mask::$value"
+  done
 fi
-# shellcheck disable=SC1090
-source "$SECRETS_FILE"
 
 stack_output() {
   aws cloudformation describe-stacks --region "$REGION" --stack-name "$1" \
@@ -33,6 +49,15 @@ stack_output() {
 }
 
 deploy_api() {
+  local overrides=(
+    SecretKey="$SECRET_KEY"
+    DatabasePassword="$DATABASE_PASSWORD"
+    OriginVerifySecret="$ORIGIN_VERIFY_SECRET"
+    SiteUrl="$1"
+  )
+  if [ -n "$GOOGLE_CLIENT_ID" ]; then
+    overrides+=(GoogleClientId="$GOOGLE_CLIENT_ID")
+  fi
   (cd "$ROOT/server" && sam deploy \
     --region "$REGION" \
     --stack-name "$API_STACK" \
@@ -40,25 +65,36 @@ deploy_api() {
     --capabilities CAPABILITY_IAM \
     --no-confirm-changeset \
     --no-fail-on-empty-changeset \
-    --parameter-overrides \
-      SecretKey="$SECRET_KEY" \
-      DatabasePassword="$DATABASE_PASSWORD" \
-      OriginVerifySecret="$ORIGIN_VERIFY_SECRET" \
-      SiteUrl="$1")
+    --parameter-overrides "${overrides[@]}")
+}
+
+# Prints the function's response and fails the deploy if the function failed.
+# The long read timeout keeps the CLI from retrying (and re-running a migration)
+# while a paused database resumes.
+invoke() {
+  local result error
+  result="$(mktemp)"
+  error="$(aws lambda invoke --region "$REGION" --function-name "$1" \
+    --cli-binary-format raw-in-base64-out --cli-read-timeout 310 \
+    --payload "$2" --query FunctionError --output text "$result")"
+  cat "$result" && echo && rm -f "$result"
+  if [ -n "$error" ] && [ "$error" != "None" ]; then
+    echo "$1 failed ($error)" >&2
+    return 1
+  fi
 }
 
 manage() {
-  local result
-  result="$(mktemp)"
-  aws lambda invoke --region "$REGION" \
-    --function-name "$(stack_output "$API_STACK" ManageFunctionName)" \
-    --cli-binary-format raw-in-base64-out \
-    --payload "{\"command\": $1}" "$result" > /dev/null
-  cat "$result" && echo && rm -f "$result"
+  invoke "$(stack_output "$API_STACK" ManageFunctionName)" "{\"command\": $1}"
 }
 
 echo "==> Building the API"
-(cd "$ROOT/server" && sam build --use-container)
+if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
+  # The runner has make, and the Makefile fetches arm64 wheels, so no Docker needed.
+  (cd "$ROOT/server" && sam build)
+else
+  (cd "$ROOT/server" && sam build --use-container)
+fi
 
 site_url="$(stack_output "$WEB_STACK" SiteUrl)"
 echo "==> Deploying the API stack"
@@ -70,6 +106,9 @@ manage '["createcachetable"]'
 if [ "${SEED_CATALOG:-0}" = "1" ]; then
   manage '["seed_catalog"]'
 fi
+
+echo "==> Copying Google's sign-in keys"
+invoke "$(stack_output "$API_STACK" GoogleKeysFunctionName)" '{}'
 
 echo "==> Deploying the storefront stack"
 aws cloudformation deploy --region "$REGION" \
@@ -87,7 +126,7 @@ if [ "$new_site_url" != "$site_url" ]; then
 fi
 
 echo "==> Uploading the storefront"
-(cd "$ROOT/client" && npm ci && npm run build)
+(cd "$ROOT/client" && npm ci && VITE_GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" npm run build)
 bucket="$(stack_output "$WEB_STACK" BucketName)"
 aws s3 sync "$ROOT/client/dist/assets" "s3://$bucket/assets" --delete \
   --cache-control "public,max-age=31536000,immutable"
@@ -102,3 +141,10 @@ aws cloudfront create-invalidation \
   --paths "/index.html" "/products/*" > /dev/null
 
 echo "Done: $new_site_url"
+if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+  {
+    echo "### Deployed"
+    echo "- Storefront: $new_site_url"
+    echo "- Admin: $new_site_url/api/admin/"
+  } >> "$GITHUB_STEP_SUMMARY"
+fi

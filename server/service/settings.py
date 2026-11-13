@@ -27,6 +27,14 @@ CSRF_TRUSTED_ORIGINS = [SITE_URL]
 # Shared secret CloudFront adds to every origin request; empty disables the check.
 ORIGIN_VERIFY_SECRET = os.getenv("ORIGIN_VERIFY_SECRET", "")
 
+# "Sign in with Google": the web OAuth client ID from Google Cloud; empty turns it off.
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
+# Google's public signing keys. The production API has no internet access, so a
+# scheduled function copies them to S3 and this points at that copy.
+GOOGLE_JWKS_URL = os.getenv(
+    "GOOGLE_JWKS_URL", "https://www.googleapis.com/oauth2/v3/certs"
+)
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",

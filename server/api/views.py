@@ -42,10 +42,12 @@ class AuthViewSet(CSRFProtectedMixin, GenericViewSet):
             return serializers.RegisterSerializer
         elif self.action == "login":
             return serializers.LoginSerializer
+        elif self.action == "google":
+            return serializers.GoogleLoginSerializer
         return serializers.ProfileSerializer
 
     def get_throttles(self) -> List[BaseThrottle]:
-        if self.action in ["register", "login"]:
+        if self.action in ["register", "login", "google"]:
             return [ViewerScopedRateThrottle()]
         return []
 
@@ -73,6 +75,15 @@ class AuthViewSet(CSRFProtectedMixin, GenericViewSet):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
         auth.login(request, user)
+        return Response(serializers.ProfileSerializer(user).data)
+
+    @action(["POST"], detail=False, url_path="google")
+    def google(self, request: Request, *args, **kwargs) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        # Google vouched for the user, so no authenticate() call picked a backend.
+        auth.login(request, user, backend="django.contrib.auth.backends.ModelBackend")
         return Response(serializers.ProfileSerializer(user).data)
 
     @action(["POST"], detail=False, url_path="logout")

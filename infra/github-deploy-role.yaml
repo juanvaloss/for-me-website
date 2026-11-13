@@ -1,0 +1,60 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  One-time setup for CI/CD: lets GitHub Actions deploy forme to this account with
+  short-lived credentials (OpenID Connect), so no AWS keys are stored in GitHub.
+  Create it once from the CloudFormation console; see DEPLOY.md.
+
+Parameters:
+  GitHubSubject:
+    Type: String
+    Default: repo:juanvaloss@111295746/for-me-website@1437950495:ref:refs/heads/main
+    Description: >
+      The only workflow identity allowed to deploy: pushes to main of this repository.
+      Repositories created after 2026-07-15 use repo:OWNER@OWNER_ID/REPO@REPO_ID:ref:refs/heads/main;
+      older ones use repo:OWNER/REPO:ref:refs/heads/main.
+  CreateOidcProvider:
+    Type: String
+    AllowedValues: ["true", "false"]
+    Default: "true"
+    Description: Use false if this account already trusts token.actions.githubusercontent.com.
+
+Conditions:
+  ShouldCreateOidcProvider: !Equals [!Ref CreateOidcProvider, "true"]
+
+Resources:
+  GitHubOidcProvider:
+    Type: AWS::IAM::OIDCProvider
+    Condition: ShouldCreateOidcProvider
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList: [sts.amazonaws.com]
+
+  # Deploying creates IAM roles, VPCs, databases and CDN distributions, which needs
+  # administrator rights. The trust policy below is what keeps it safe: only a
+  # workflow running on main of this exact repository can assume the role.
+  DeployRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Description: Assumed by GitHub Actions to deploy forme
+      MaxSessionDuration: 7200
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !If
+                - ShouldCreateOidcProvider
+                - !Ref GitHubOidcProvider
+                - !Sub arn:aws:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+                token.actions.githubusercontent.com:sub: !Ref GitHubSubject
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+Outputs:
+  RoleArn:
+    Description: Save it in GitHub as the AWS_ROLE_ARN repository variable.
+    Value: !GetAtt DeployRole.Arn

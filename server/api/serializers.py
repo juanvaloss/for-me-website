@@ -1,13 +1,16 @@
 import re
 from typing import Dict, List, Tuple
 
+from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 from rest_framework.fields import get_error_detail
 
+from accounts import google
 from api import models
+from api.exceptions import GoogleSignInUnavailable
 from store.models import MAX_UNITS_PER_ITEM
 
 PHONE_PATTERN = re.compile(r"^\d{10,15}$")
@@ -99,6 +102,27 @@ class LoginSerializer(serializers.Serializer):
             )
         attrs["user"] = user
         return attrs
+
+
+class GoogleLoginSerializer(serializers.Serializer):
+    # The ID token that the "Sign in with Google" button hands to the storefront.
+    credential = serializers.CharField(write_only=True, max_length=4096)
+
+    def validate(self, attrs: Dict) -> Dict:
+        if not settings.GOOGLE_CLIENT_ID:
+            raise GoogleSignInUnavailable()
+        try:
+            attrs["identity"] = google.verify_id_token(attrs["credential"])
+        except google.GoogleKeysUnavailableError:
+            raise GoogleSignInUnavailable()
+        except google.GoogleTokenError:
+            raise serializers.ValidationError(
+                "Google could not confirm this sign-in.", code="invalid_google_token"
+            )
+        return attrs
+
+    def create(self, validated_data: Dict) -> models.User:
+        return models.User.objects.get_or_create_for_google(validated_data["identity"])
 
 
 # ---------- Catalog ---------- #

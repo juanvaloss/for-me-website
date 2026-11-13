@@ -16,6 +16,8 @@ export const api = {
     request<Profile>("/v1/auth/register/", { method: "POST", body: payload }),
   login: (payload: LoginPayload) =>
     request<Profile>("/v1/auth/login/", { method: "POST", body: payload }),
+  googleLogin: (credential: string) =>
+    request<Profile>("/v1/auth/google/", { method: "POST", body: { credential } }),
   logout: () => request<void>("/v1/auth/logout/", { method: "POST" }),
   updateProfile: (payload: ProfileUpdate) =>
     request<Profile>("/v1/me/", { method: "PATCH", body: payload }),

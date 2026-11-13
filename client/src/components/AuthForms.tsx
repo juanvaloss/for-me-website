@@ -3,8 +3,10 @@ import { useState, type FormEvent } from "react";
 
 import { useAuth } from "../context/auth";
 import { fieldError, formError } from "../lib/errors";
+import { GOOGLE_CLIENT_ID } from "../lib/googleSignIn";
 import styles from "./AuthForms.module.css";
 import { Field } from "./Field";
+import { GoogleSignIn } from "./GoogleSignIn";
 
 type Mode = "login" | "register";
 
@@ -18,6 +20,7 @@ export function AuthForms() {
 
   return (
     <div className={styles.auth}>
+      {GOOGLE_CLIENT_ID && <GoogleSignIn />}
       <div className={styles.tabs} role="tablist">
         {TABS.map((tab) => (
           <button

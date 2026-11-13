@@ -29,6 +29,10 @@ Parameters:
     Type: String
     Default: "16.6"
     Description: Aurora PostgreSQL version. Scaling to zero needs 16.3+, 15.7+, 14.12+ or 13.15+.
+  GoogleClientId:
+    Type: String
+    Default: ""
+    Description: Web OAuth client ID for "Sign in with Google" (empty turns it off).
 
 Globals:
   Function:
@@ -48,6 +52,8 @@ Globals:
         ALLOWED_HOSTS: !Sub ".lambda-url.${AWS::Region}.on.aws"
         SITE_URL: !Ref SiteUrl
         ORIGIN_VERIFY_SECRET: !Ref OriginVerifySecret
+        GOOGLE_CLIENT_ID: !Ref GoogleClientId
+        GOOGLE_JWKS_URL: !Sub "https://${GoogleKeysBucket.RegionalDomainName}/google-jwks.json"
 
 Resources:
   # Private subnets only: the functions never need the internet, so there is no
@@ -75,6 +81,41 @@ Resources:
       VpcId: !Ref Vpc
       CidrBlock: 10.20.2.0/24
       AvailabilityZone: !Select [1, !GetAZs ""]
+
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+
+  PrivateSubnetARouteTable:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetA
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateSubnetBRouteTable:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetB
+      RouteTableId: !Ref PrivateRouteTable
+
+  # Gateway endpoints are free. It lets the API read Google's sign-in keys from S3
+  # while the subnets still have no route to the internet.
+  S3Endpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref Vpc
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      VpcEndpointType: Gateway
+      RouteTableIds: [!Ref PrivateRouteTable]
+      # Only the key file is reachable, so the endpoint can't carry data elsewhere.
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: "*"
+            Action: s3:GetObject
+            Resource: !Sub "${GoogleKeysBucket.Arn}/google-jwks.json"
 
   ApiSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -159,6 +200,135 @@ Resources:
       LogGroupName: !Sub /aws/lambda/${ManageFunction}
       RetentionInDays: 14
 
+  # ---------- Google sign-in keys ---------- #
+  # Google signs its ID tokens with keys it rotates regularly. The API can't reach
+  # Google, so this function (outside the VPC) copies them to S3 every hour.
+
+  GoogleKeysBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  # Readable without credentials, but only from inside the API's VPC.
+  GoogleKeysBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref GoogleKeysBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: "*"
+            Action: s3:GetObject
+            Resource: !Sub "${GoogleKeysBucket.Arn}/google-jwks.json"
+            Condition:
+              StringEquals:
+                aws:SourceVpce: !Ref S3Endpoint
+          - Effect: Deny
+            Principal: "*"
+            Action: s3:*
+            Resource:
+              - !GetAtt GoogleKeysBucket.Arn
+              - !Sub "${GoogleKeysBucket.Arn}/*"
+            Condition:
+              Bool:
+                aws:SecureTransport: "false"
+
+  GoogleKeysRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: write-google-keys
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: s3:PutObject
+                Resource: !Sub "${GoogleKeysBucket.Arn}/google-jwks.json"
+
+  # A plain Lambda resource on purpose: SAM's Globals (VPC, database secrets) only
+  # apply to AWS::Serverless::Function, and this one needs neither.
+  GoogleKeysFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Copies Google's public sign-in keys to S3 for the API
+      Runtime: python3.12
+      Architectures: [arm64]
+      MemorySize: 128
+      Timeout: 30
+      Handler: index.handler
+      Role: !GetAtt GoogleKeysRole.Arn
+      Environment:
+        Variables:
+          SOURCE_URL: https://www.googleapis.com/oauth2/v3/certs
+          BUCKET: !Ref GoogleKeysBucket
+      Code:
+        ZipFile: |
+          import json
+          import os
+          import urllib.request
+
+          import boto3
+
+
+          def handler(event, context):
+              with urllib.request.urlopen(os.environ["SOURCE_URL"], timeout=10) as response:
+                  body = response.read()
+              # Never replace good keys with an error page or an empty set.
+              keys = json.loads(body)["keys"]
+              if not keys:
+                  raise ValueError("Google returned no keys")
+              boto3.client("s3").put_object(
+                  Bucket=os.environ["BUCKET"],
+                  Key="google-jwks.json",
+                  Body=body,
+                  ContentType="application/json",
+              )
+              return {"keys": len(keys)}
+
+  GoogleKeysLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${GoogleKeysFunction}
+      RetentionInDays: 14
+
+  GoogleKeysSchedule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Refresh Google's sign-in keys, which Google rotates regularly
+      ScheduleExpression: rate(1 hour)
+      Targets:
+        - Id: copy-google-keys
+          Arn: !GetAtt GoogleKeysFunction.Arn
+
+  GoogleKeysSchedulePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref GoogleKeysFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt GoogleKeysSchedule.Arn
+
 Outputs:
   ApiDomain:
     Description: Function URL host, used as the CloudFront origin for /api/*.
@@ -166,3 +336,6 @@ Outputs:
   ManageFunctionName:
     Description: 'Invoke with {"command": [...]} to run management commands.'
     Value: !Ref ManageFunction
+  GoogleKeysFunctionName:
+    Description: Invoke once after the first deploy so Google sign-in works right away.
+    Value: !Ref GoogleKeysFunction

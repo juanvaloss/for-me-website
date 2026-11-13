@@ -3,6 +3,9 @@ import uuid
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 
+from accounts import exceptions
+from accounts.google import GoogleIdentity
+
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -31,6 +34,34 @@ class UserManager(BaseUserManager):
     def email_is_taken(self, email: str) -> bool:
         return self.filter(email__iexact=email).exists()
 
+    def get_or_create_for_google(self, identity: GoogleIdentity) -> "User":
+        user = (
+            self.filter(google_sub=identity.sub).first()
+            or self.filter(email__iexact=identity.email).first()
+        )
+        if user is None:
+            return self.create_user(
+                identity.email,
+                google_sub=identity.sub,
+                first_name=identity.first_name,
+                last_name=identity.last_name,
+            )
+        if not user.is_active:
+            raise exceptions.AccountDisabledError()
+        # The admin keeps its password sign-in; a Google account never opens it.
+        if user.is_staff:
+            raise exceptions.GoogleAccountConflictError()
+        if user.google_sub != identity.sub:
+            # Only link when Google hosts the mailbox and so vouches for its owner.
+            if user.google_sub or not identity.is_email_authoritative:
+                raise exceptions.GoogleAccountConflictError()
+            # The store never verified this email, so whoever set the password may
+            # not own the mailbox. Dropping it also ends that person's sessions.
+            user.google_sub = identity.sub
+            user.set_unusable_password()
+            user.save(update_fields=["google_sub", "password"])
+        return user
+
 
 class User(AbstractUser):
     SHIPPING_FIELDS = [
@@ -52,6 +83,15 @@ class User(AbstractUser):
     city = models.CharField(max_length=120, blank=True)
     state = models.CharField(max_length=120, blank=True)
     postal_code = models.CharField(max_length=10, blank=True)
+    # Google's stable account ID, set once the customer signs in with Google.
+    google_sub = models.CharField(
+        "Google account ID",
+        max_length=255,
+        unique=True,
+        null=True,
+        blank=True,
+        editable=False,
+    )
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
