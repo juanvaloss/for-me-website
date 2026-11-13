@@ -46,7 +46,21 @@ stack_output() {
     --query "Stacks[0].Outputs[?OutputKey=='$2'].OutputValue" --output text 2>/dev/null || true
 }
 
+# A stack whose first creation failed sits in ROLLBACK_COMPLETE with no resources
+# and can't be updated, so it is deleted to let the next deploy start clean.
+clear_failed_stack() {
+  local status
+  status="$(aws cloudformation describe-stacks --region "$REGION" --stack-name "$1" \
+    --query "Stacks[0].StackStatus" --output text 2>/dev/null || true)"
+  if [ "$status" = "ROLLBACK_COMPLETE" ]; then
+    echo "==> Deleting $1: its first creation failed and left it empty"
+    aws cloudformation delete-stack --region "$REGION" --stack-name "$1"
+    aws cloudformation wait stack-delete-complete --region "$REGION" --stack-name "$1"
+  fi
+}
+
 deploy_api() {
+  clear_failed_stack "$API_STACK"
   (cd "$ROOT/server" && sam deploy \
     --region "$REGION" \
     --stack-name "$API_STACK" \
@@ -100,6 +114,7 @@ if [ "${SEED_CATALOG:-0}" = "1" ]; then
 fi
 
 echo "==> Deploying the storefront stack"
+clear_failed_stack "$WEB_STACK"
 aws cloudformation deploy --region "$REGION" \
   --stack-name "$WEB_STACK" \
   --template-file "$ROOT/client/template.yaml" \

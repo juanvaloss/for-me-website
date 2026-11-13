@@ -73,8 +73,13 @@ CodePipeline/CodeBuild.
 4. **Crea una alerta de gasto** (las alertas son gratis): busca **Budgets** →
    **Create budget** → **Use a template** → **Monthly cost budget** → monto
    `10` USD → tu correo → **Create budget**. Te avisará si algo se sale de lo normal.
-5. Arriba a la derecha elige la región **US East (N. Virginia) `us-east-1`**. Todo
-   el proyecto vive ahí.
+5. Todo el proyecto vive en la región **US East (N. Virginia) `us-east-1`**. No
+   hace falta activarla, ya viene activada. Se elige en el selector de arriba a la
+   derecha, pero **solo dentro de un servicio regional**. En páginas globales como
+   Billing, IAM o Budgets el selector dice **Global** y todas las regiones salen con
+   un candado. Abre por ejemplo **CloudFormation** (paso 3) y ahí elige
+   **N. Virginia**, o entra directo a
+   <https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1>.
 
 > Recomendado: para el uso diario crea un usuario administrador con **IAM Identity
 > Center** (gratis) y deja el usuario raíz solo para facturación.
@@ -216,8 +221,9 @@ pedidos siguen por Instagram. Para crear su usuario:
 | El job **Deploy to AWS** aparece como _skipped_ | Falta la variable `AWS_ROLE_ARN` (paso 4), o el run no fue en `main`. |
 | `Not authorized to perform sts:AssumeRoleWithWebIdentity` | El repositorio no coincide con `GitHubSubject` (¿lo renombraste o transferiste?). Actualiza el parámetro: CloudFormation → `forme-github` → **Update** → **Use current template**. |
 | `Your account must be verified before you can add new CloudFront resources` | Pasa con algunas cuentas nuevas. Abre un caso en **AWS Support** (el plan básico es gratis) pidiendo la verificación y vuelve a correr el workflow. |
-| `Cannot find version 16.6 for aurora-postgresql` | AWS retiró esa versión menor. Cambia `DatabaseEngineVersion` en `server/template.yaml` por una vigente (16.3 o mayor). |
-| `forme-api … is in ROLLBACK_COMPLETE state and can not be updated` | Falló la creación inicial. Borra el stack `forme-api` en CloudFormation y vuelve a correr el workflow. |
+| `DatabaseCluster` falla con `Cannot find version … for aurora-postgresql` | AWS retira cada versión menor más o menos al año. Cambia `DatabaseEngineVersion` en `server/template.yaml` por una vigente (16.3 o mayor; las ves en **RDS → Create database → Aurora PostgreSQL → Engine version**), haz push y vuelve a correr. |
+| `DatabaseCluster` falla con un mensaje que menciona _free plan_, _free tier_ o _express configuration_ | La cuenta está en el Free plan, que solo permite Aurora en "express configuration". Cámbiala a **Paid plan** (Billing → **Upgrade plan**; conservas los créditos) y vuelve a correr. |
+| Falló el primer deploy y el stack quedó en `ROLLBACK_COMPLETE` | El script borra solo ese stack vacío en la siguiente corrida; arregla la causa y vuelve a correr el workflow. |
 | La API responde `{"detail": "Forbidden."}` | CloudFront y la API tienen distinto secreto de origen. Vuelve a correr el workflow para sincronizarlos. |
 | Error 403 de CSRF al entrar al admin | La API no conoce la URL del sitio. Vuelve a correr el workflow, que la sincroniza. |
 | Al dar "Pídelo por DM" no se pega nada | El navegador bloqueó el portapapeles (pasa en algunos navegadores dentro de apps). El chat de Instagram abre igual y la persona puede escribir su mensaje. |
