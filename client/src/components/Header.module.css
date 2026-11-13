@@ -39,7 +39,7 @@
 }
 
 .navLink,
-.bag {
+.instagram {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -74,19 +74,6 @@
 .logo {
   display: flex;
   justify-content: center;
-}
-
-.count {
-  display: inline-grid;
-  place-items: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  border-radius: var(--radius-pill);
-  background: var(--brown);
-  color: var(--cream);
-  font-size: 10.5px;
-  letter-spacing: 0;
 }
 
 .menuButton {
@@ -153,7 +140,6 @@
   }
 
   .nav,
-  .actions .navLink,
   .actionLabel {
     display: none;
   }

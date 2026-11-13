@@ -4,17 +4,12 @@ import { useEffect, type ReactNode } from "react";
 import { Route, Routes, useLocation } from "react-router";
 
 import { api } from "./api/endpoints";
-import { CartDrawer } from "./components/CartDrawer";
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
-import { AuthProvider } from "./context/AuthProvider";
-import { CartProvider } from "./context/CartProvider";
 import { scrollToTop } from "./lib/scroll";
 import { CatalogPage } from "./pages/CatalogPage";
-import { CheckoutPage } from "./pages/CheckoutPage";
 import { HomePage } from "./pages/HomePage";
 import { NotFoundPage } from "./pages/NotFoundPage";
-import { ProfilePage } from "./pages/ProfilePage";
 
 const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 
@@ -29,14 +24,9 @@ export function App() {
   return (
     <MotionConfig reducedMotion="user">
       <ReactLenis root options={{ lerp: 0.1, smoothWheel: !prefersReducedMotion }}>
-        <AuthProvider>
-          <CartProvider>
-            <Header />
-            <AnimatedRoutes />
-            <Footer />
-            <CartDrawer />
-          </CartProvider>
-        </AuthProvider>
+        <Header />
+        <AnimatedRoutes />
+        <Footer />
       </ReactLenis>
     </MotionConfig>
   );
@@ -51,8 +41,6 @@ function AnimatedRoutes() {
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<Page><HomePage /></Page>} />
         <Route path="/catalog" element={<Page><CatalogPage /></Page>} />
-        <Route path="/profile" element={<Page><ProfilePage /></Page>} />
-        <Route path="/checkout" element={<Page><CheckoutPage /></Page>} />
         <Route path="*" element={<Page><NotFoundPage /></Page>} />
       </Routes>
     </AnimatePresence>

@@ -1,16 +1,8 @@
-from django.contrib import admin, messages
+from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
 
-from store import exceptions
-from store.models import (
-    Category,
-    Order,
-    OrderItem,
-    Product,
-    ProductColor,
-    ProductVariant,
-)
+from store.models import Category, Product, ProductColor, ProductVariant
 
 
 @admin.register(Category)
@@ -104,78 +96,3 @@ class StockAdmin(admin.ModelAdmin):
     @admin.display(description="color", ordering="color__name")
     def color_name(self, obj: ProductVariant) -> str:
         return obj.color.name
-
-
-class OrderItemInline(admin.TabularInline):
-    model = OrderItem
-    extra = 0
-    can_delete = False
-    fields = ["product_name", "color_name", "size", "unit_price", "quantity"]
-    readonly_fields = fields
-
-    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
-
-
-@admin.register(Order)
-class OrderAdmin(admin.ModelAdmin):
-    list_display = ["reference", "contact_name", "status", "total", "created_at"]
-    list_filter = ["status", "created_at"]
-    search_fields = ["reference", "contact_name", "contact_phone", "customer__email"]
-    fields = [
-        "reference",
-        "customer",
-        "status",
-        "total",
-        "contact_name",
-        "contact_phone",
-        "shipping_address",
-        "notes",
-        "created_at",
-        "updated_at",
-    ]
-    # Status only changes through the actions below, so stock always stays in sync.
-    readonly_fields = [
-        "reference",
-        "customer",
-        "status",
-        "total",
-        "created_at",
-        "updated_at",
-    ]
-    inlines = [OrderItemInline]
-    actions = ["mark_confirmed", "mark_shipped", "mark_delivered", "cancel_orders"]
-
-    def has_add_permission(self, request: HttpRequest) -> bool:
-        return False
-
-    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
-
-    @admin.action(description="Mark selected orders as confirmed")
-    def mark_confirmed(self, request: HttpRequest, queryset: QuerySet) -> None:
-        self._advance(request, queryset, Order.Status.CONFIRMED)
-
-    @admin.action(description="Mark selected orders as shipped")
-    def mark_shipped(self, request: HttpRequest, queryset: QuerySet) -> None:
-        self._advance(request, queryset, Order.Status.SHIPPED)
-
-    @admin.action(description="Mark selected orders as delivered")
-    def mark_delivered(self, request: HttpRequest, queryset: QuerySet) -> None:
-        self._advance(request, queryset, Order.Status.DELIVERED)
-
-    @admin.action(description="Cancel selected orders and restock")
-    def cancel_orders(self, request: HttpRequest, queryset: QuerySet) -> None:
-        cancelled = 0
-        for order in queryset:
-            try:
-                order.cancel()
-                cancelled += 1
-            except exceptions.OrderNotCancellableError as exc:
-                self.message_user(request, str(exc), messages.WARNING)
-        self.message_user(request, f"{cancelled} order(s) cancelled and restocked.")
-
-    def _advance(self, request: HttpRequest, queryset: QuerySet, status: str) -> None:
-        updated = queryset.advance_to(status)
-        label = Order.Status(status).label.lower()
-        self.message_user(request, f"{updated} order(s) marked as {label}.")

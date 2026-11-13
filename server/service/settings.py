@@ -27,14 +27,6 @@ CSRF_TRUSTED_ORIGINS = [SITE_URL]
 # Shared secret CloudFront adds to every origin request; empty disables the check.
 ORIGIN_VERIFY_SECRET = os.getenv("ORIGIN_VERIFY_SECRET", "")
 
-# "Sign in with Google": the web OAuth client ID from Google Cloud; empty turns it off.
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
-# Google's public signing keys. The production API has no internet access, so a
-# scheduled function copies them to S3 and this points at that copy.
-GOOGLE_JWKS_URL = os.getenv(
-    "GOOGLE_JWKS_URL", "https://www.googleapis.com/oauth2/v3/certs"
-)
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -106,14 +98,6 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-# Shared across Lambda instances, which is what the login throttling relies on.
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
-        "LOCATION": "cache",
-    }
-}
-
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "America/Mexico_City"
 USE_I18N = True
@@ -145,7 +129,6 @@ REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"]
     + (["rest_framework.renderers.BrowsableAPIRenderer"] if DEBUG else []),
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
-    "DEFAULT_THROTTLE_RATES": {"auth": "10/min"},
     "EXCEPTION_HANDLER": "api.exceptions.custom_exception_handler",
 }
 

@@ -14,16 +14,10 @@ class UserFactory:
     def create(self, **kwargs) -> User:
         number = next(_sequence)
         defaults = {
-            "email": f"customer{number}@example.com",
+            "email": f"founder{number}@example.com",
             "password": "a-Strong-passw0rd",
             "first_name": "Ana",
             "last_name": "García",
-            "phone": "3312345678",
-            "address_line": "Av. Chapultepec 123",
-            "neighborhood": "Americana",
-            "city": "Guadalajara",
-            "state": "Jalisco",
-            "postal_code": "44160",
         }
         defaults.update(kwargs)
         return User.objects.create_user(**defaults)

@@ -3,15 +3,13 @@
 # GitHub Actions runs it on every push to main (.github/workflows/ci-cd.yml); it
 # also runs locally with the AWS CLI, the SAM CLI and Docker. Safe to re-run.
 #
-#   ./scripts/deploy.sh                          # deploy / update everything
-#   SEED_CATALOG=1 ./scripts/deploy.sh           # also load server/store/data/catalog.json
-#   GOOGLE_CLIENT_ID=... ./scripts/deploy.sh     # turn on "Sign in with Google"
+#   ./scripts/deploy.sh                  # deploy / update everything
+#   SEED_CATALOG=1 ./scripts/deploy.sh   # also load server/store/data/catalog.json
 set -euo pipefail
 
 REGION="${AWS_REGION:-us-east-1}"
 API_STACK="${API_STACK:-forme-api}"
 WEB_STACK="${WEB_STACK:-forme-web}"
-GOOGLE_CLIENT_ID="${GOOGLE_CLIENT_ID:-}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 random_token() {
@@ -49,15 +47,6 @@ stack_output() {
 }
 
 deploy_api() {
-  local overrides=(
-    SecretKey="$SECRET_KEY"
-    DatabasePassword="$DATABASE_PASSWORD"
-    OriginVerifySecret="$ORIGIN_VERIFY_SECRET"
-    SiteUrl="$1"
-  )
-  if [ -n "$GOOGLE_CLIENT_ID" ]; then
-    overrides+=(GoogleClientId="$GOOGLE_CLIENT_ID")
-  fi
   (cd "$ROOT/server" && sam deploy \
     --region "$REGION" \
     --stack-name "$API_STACK" \
@@ -65,7 +54,11 @@ deploy_api() {
     --capabilities CAPABILITY_IAM \
     --no-confirm-changeset \
     --no-fail-on-empty-changeset \
-    --parameter-overrides "${overrides[@]}")
+    --parameter-overrides \
+      SecretKey="$SECRET_KEY" \
+      DatabasePassword="$DATABASE_PASSWORD" \
+      OriginVerifySecret="$ORIGIN_VERIFY_SECRET" \
+      SiteUrl="$1")
 }
 
 # Prints the function's response and fails the deploy if the function failed.
@@ -102,13 +95,9 @@ deploy_api "${site_url:-http://localhost:5173}"
 
 echo "==> Migrating the database"
 manage '["migrate", "--noinput"]'
-manage '["createcachetable"]'
 if [ "${SEED_CATALOG:-0}" = "1" ]; then
   manage '["seed_catalog"]'
 fi
-
-echo "==> Copying Google's sign-in keys"
-invoke "$(stack_output "$API_STACK" GoogleKeysFunctionName)" '{}'
 
 echo "==> Deploying the storefront stack"
 aws cloudformation deploy --region "$REGION" \
@@ -126,7 +115,7 @@ if [ "$new_site_url" != "$site_url" ]; then
 fi
 
 echo "==> Uploading the storefront"
-(cd "$ROOT/client" && npm ci && VITE_GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" npm run build)
+(cd "$ROOT/client" && npm ci && npm run build)
 bucket="$(stack_output "$WEB_STACK" BucketName)"
 aws s3 sync "$ROOT/client/dist/assets" "s3://$bucket/assets" --delete \
   --cache-control "public,max-age=31536000,immutable"

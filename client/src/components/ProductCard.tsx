@@ -3,7 +3,6 @@ import { useState, type CSSProperties } from "react";
 
 import type { Product, Size } from "../api/types";
 import { INSTAGRAM_DM_URL } from "../config";
-import { useCart } from "../context/cart";
 import { defaultColorIndex } from "../lib/catalog";
 import { formatPrice, pluralize } from "../lib/format";
 import { CheckIcon, InstagramIcon } from "./icons";
@@ -12,43 +11,28 @@ import { ProductPhoto } from "./ProductPhoto";
 
 const LOW_STOCK = 2;
 
+function dmMessage(product: Product, colorName: string, size?: Size): string {
+  const piece = `${product.name} en color ${colorName}${size ? `, talla ${size}` : ""}`;
+  return `¡Hola! Me interesa esta pieza: ${piece}. ¿Está disponible?`;
+}
+
 export function ProductCard({ product }: { product: Product }) {
-  const cart = useCart();
   const [colorIndex, setColorIndex] = useState(() => defaultColorIndex(product));
   const [size, setSize] = useState<Size | null>(null);
-  const [justAdded, setJustAdded] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   const color = product.colors[colorIndex];
   const hasStock = color.units_in_stock > 0;
   const variant = color.variants.find((item) => item.size === size && item.stock > 0);
-  const inBag = variant ? cart.quantityOf(variant.id) : 0;
 
-  const addToBag = () => {
-    if (!variant) {
-      return;
-    }
-    cart.add({
-      variantId: variant.id,
-      productSlug: product.slug,
-      productName: product.name,
-      categorySlug: product.category,
-      colorName: color.name,
-      colorHex: color.hex,
-      photo: color.photo,
-      size: variant.size,
-      unitPrice: Number(product.price),
-      maxQuantity: variant.stock,
-    });
-    setJustAdded(true);
-    window.setTimeout(() => setJustAdded(false), 1800);
+  // Instagram links can't carry a message, so it goes to the clipboard and the
+  // link opens the chat; the shopper only has to paste it.
+  const askByDm = () => {
+    setIsCopied(false);
+    navigator.clipboard
+      ?.writeText(dmMessage(product, color.name, variant?.size))
+      .then(() => setIsCopied(true), () => undefined);
   };
-
-  let buttonLabel = "Agregar a la bolsa";
-  if (!variant) {
-    buttonLabel = "Elige tu talla";
-  } else if (inBag >= variant.stock) {
-    buttonLabel = "Ya están todas en tu bolsa";
-  }
 
   return (
     <article className={styles.card}>
@@ -108,7 +92,10 @@ export function ProductCard({ product }: { product: Product }) {
                   option.units_in_stock > 0 ? styles.swatchStocked : ""
                 }`}
                 style={{ "--swatch": option.hex } as CSSProperties}
-                onClick={() => setColorIndex(index)}
+                onClick={() => {
+                  setColorIndex(index);
+                  setIsCopied(false);
+                }}
               />
             ))}
           </div>
@@ -134,7 +121,10 @@ export function ProductCard({ product }: { product: Product }) {
                   className={`${styles.size} ${isSelected ? styles.selected : ""}`}
                   disabled={option.stock === 0}
                   aria-pressed={isSelected}
-                  onClick={() => setSize(option.size)}
+                  onClick={() => {
+                    setSize(option.size);
+                    setIsCopied(false);
+                  }}
                 >
                   <span className={styles.sizeLabel}>{option.size}</span>
                   <span className={styles.sizeStock}>
@@ -148,30 +138,20 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
         </fieldset>
 
-        {hasStock ? (
-          <button
-            type="button"
-            className={`btn btn-primary btn-block ${justAdded ? styles.added : ""}`}
-            disabled={!variant || inBag >= variant.stock}
-            onClick={addToBag}
-          >
-            {justAdded ? (
-              <>
-                <CheckIcon size={16} /> Agregado a tu bolsa
-              </>
-            ) : (
-              buttonLabel
-            )}
-          </button>
-        ) : (
-          <a
-            className="btn btn-outline btn-block"
-            href={INSTAGRAM_DM_URL}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <InstagramIcon size={16} /> Pídelo por DM
-          </a>
+        <a
+          className={`btn ${hasStock ? "btn-primary" : "btn-outline"} btn-block`}
+          href={INSTAGRAM_DM_URL}
+          target="_blank"
+          rel="noreferrer"
+          onClick={askByDm}
+        >
+          <InstagramIcon size={16} />
+          {variant ? `Pide la talla ${variant.size} por DM` : "Pídelo por DM"}
+        </a>
+        {isCopied && (
+          <p className={styles.copied} role="status">
+            <CheckIcon size={14} /> Copiamos tu mensaje: pégalo en el chat.
+          </p>
         )}
 
         {product.features.length > 0 && (

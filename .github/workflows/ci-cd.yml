@@ -88,5 +88,4 @@ jobs:
       - name: Deploy
         run: bash scripts/deploy.sh
         env:
-          GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
           SEED_CATALOG: ${{ inputs.seed_catalog && '1' || '0' }}

@@ -7,24 +7,11 @@ from accounts.models import User
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     ordering = ["email"]
-    list_display = ["email", "first_name", "last_name", "phone", "date_joined"]
-    search_fields = ["email", "first_name", "last_name", "phone"]
-    readonly_fields = ["google_sub"]
+    list_display = ["email", "first_name", "last_name", "is_staff", "date_joined"]
+    search_fields = ["email", "first_name", "last_name"]
     fieldsets = [
-        (None, {"fields": ["email", "password", "google_sub"]}),
-        ("Personal info", {"fields": ["first_name", "last_name", "phone"]}),
-        (
-            "Shipping",
-            {
-                "fields": [
-                    "address_line",
-                    "neighborhood",
-                    "city",
-                    "state",
-                    "postal_code",
-                ]
-            },
-        ),
+        (None, {"fields": ["email", "password"]}),
+        ("Personal info", {"fields": ["first_name", "last_name"]}),
         (
             "Permissions",
             {"fields": ["is_active", "is_staff", "is_superuser", "groups"]},

@@ -6,28 +6,14 @@ from rest_framework import exceptions, status
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
 
-from accounts.exceptions import AccountError
-from store.exceptions import StoreError
-
 logger = logging.getLogger(__name__)
-
-
-class GoogleSignInUnavailable(exceptions.APIException):
-    status_code = status.HTTP_503_SERVICE_UNAVAILABLE
-    default_detail = "Sign in with Google is not available right now."
-    default_code = "google_unavailable"
 
 
 def custom_exception_handler(exc, context):
     """
     Every error shares one shape so the storefront can translate it by code:
-    {"detail": str, "code": str, "fields": {...}?, "meta": {...}?}
+    {"detail": str, "code": str, "fields": {...}?}
     """
-    if isinstance(exc, (StoreError, AccountError)):
-        return Response(
-            {"detail": str(exc), "code": exc.code, "meta": exc.meta},
-            status=status.HTTP_409_CONFLICT,
-        )
     if isinstance(exc, Http404):
         exc = exceptions.NotFound()
     elif isinstance(exc, DjangoPermissionDenied):

@@ -7,7 +7,6 @@ import { MaskedLines } from "../components/Reveal";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { useProducts } from "../hooks/useProducts";
 import { sortByAvailability, summarizeCategories } from "../lib/catalog";
-import { formError } from "../lib/errors";
 import { pluralize } from "../lib/format";
 import styles from "./CatalogPage.module.css";
 
@@ -64,8 +63,8 @@ export function CatalogPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: 0.45, ease: EASE_OUT }}
           >
-            Elige tu color y tu talla. Lo que está en stock se aparta en línea;
-            el resto de la colección se pide por DM.
+            Elige tu color y tu talla, y pídela por DM: copiamos tu mensaje y
+            abrimos Instagram para que solo lo pegues.
           </motion.p>
         </div>
       </header>
@@ -116,7 +115,7 @@ export function CatalogPage() {
       <div className="container">
         {error && !products ? (
           <div className={styles.state}>
-            <p>{formError(error)}</p>
+            <p>No pudimos cargar el catálogo. Revisa tu conexión e intenta de nuevo.</p>
             <button type="button" className="btn btn-outline" onClick={retry}>
               Intentar de nuevo
             </button>

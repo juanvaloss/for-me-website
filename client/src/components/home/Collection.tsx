@@ -38,7 +38,7 @@ export function Collection() {
           <Reveal delay={0.1} className={styles.headAside}>
             <p>
               {products
-                ? `${pluralize(totalUnits, "pieza", "piezas")} en stock para apartar en línea; el resto del Drop 01 se pide por DM.`
+                ? `${pluralize(totalUnits, "pieza", "piezas")} en stock. Todo el Drop 01 se pide por DM en Instagram.`
                 : error
                   ? "Explora todas las piezas en el catálogo."
                   : "Revisando existencias…"}

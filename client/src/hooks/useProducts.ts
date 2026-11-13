@@ -3,7 +3,7 @@ import { useSyncExternalStore } from "react";
 import { api } from "../api/endpoints";
 import type { Product } from "../api/types";
 
-// One shared catalog for every page, refreshed after an order changes stock.
+// One shared catalog for every page, loaded once per visit.
 interface Snapshot {
   products?: Product[];
   error?: unknown;
@@ -18,7 +18,7 @@ function publish(next: Snapshot) {
   listeners.forEach((listener) => listener());
 }
 
-export function refreshProducts(): Promise<void> {
+function refreshProducts(): Promise<void> {
   inflight ??= api
     .products()
     .then(

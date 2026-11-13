@@ -1,11 +1,11 @@
 # Guía de despliegue: AWS + CI/CD con GitHub Actions
 
-Al terminar esta guía tendrás la tienda en internet y un flujo automático: **cada
+Al terminar esta guía tendrás el catálogo en internet y un flujo automático: **cada
 vez que hagas push a `main`, GitHub corre las pruebas y, si pasan, despliega a AWS.**
 Los pull requests solo corren las pruebas.
 
 No necesitas instalar nada en tu computadora para desplegar: todo se hace desde
-el navegador (consola de AWS, GitHub y Google Cloud).
+el navegador (consola de AWS y GitHub).
 
 ```
 push a main ──▶ GitHub Actions ──▶ pruebas (API + tienda)
@@ -26,12 +26,11 @@ push a main ──▶ GitHub Actions ──▶ pruebas (API + tienda)
 4. [Configurar el repositorio en GitHub](#4-configurar-el-repositorio-en-github)
 5. [Primer despliegue](#5-primer-despliegue)
 6. [Crear el usuario administrador](#6-crear-el-usuario-administrador)
-7. [Activar "Continuar con Google"](#7-activar-continuar-con-google)
-8. [El día a día](#8-el-día-a-día)
-9. [Mantener el costo bajo](#9-mantener-el-costo-bajo)
-10. [Problemas comunes](#10-problemas-comunes)
-11. [Borrar todo](#11-borrar-todo)
-12. [Alternativa: desplegar desde tu computadora](#12-alternativa-desplegar-desde-tu-computadora)
+7. [El día a día](#7-el-día-a-día)
+8. [Mantener el costo bajo](#8-mantener-el-costo-bajo)
+9. [Problemas comunes](#9-problemas-comunes)
+10. [Borrar todo](#10-borrar-todo)
+11. [Alternativa: desplegar desde tu computadora](#11-alternativa-desplegar-desde-tu-computadora)
 
 ---
 
@@ -43,8 +42,8 @@ La arquitectura está pensada para costar lo menos posible:
 | --- | --- |
 | GitHub Actions (pruebas y deploys) | **$0** en repositorios públicos |
 | CloudFront, Lambda, EventBridge | **$0** dentro de los límites gratuitos permanentes |
-| Credenciales de GitHub (OIDC), secretos (SSM Parameter Store), endpoint de S3 | **$0** |
-| S3 (la tienda, llaves de Google, paquetes del deploy) | centavos |
+| Credenciales de GitHub (OIDC), secretos (SSM Parameter Store) | **$0** |
+| S3 (el sitio y los paquetes del deploy) | centavos |
 | Aurora Serverless v2 (base de datos) | **$0 mientras está en pausa**; ~US$0.06 por hora despierta, + US$0.10 por GB al mes |
 | CloudWatch Logs (14 días) | centavos |
 
@@ -121,7 +120,6 @@ pestaña **Variables** → **New repository variable**. Crea:
 | --- | --- |
 | `AWS_ROLE_ARN` | El **RoleArn** del paso anterior |
 | `AWS_REGION` | `us-east-1` |
-| `GOOGLE_CLIENT_ID` | Déjala para después ([paso 7](#7-activar-continuar-con-google)) |
 
 **No hace falta crear ningún _secret_ en GitHub.** Las contraseñas de la base de
 datos, la `SECRET_KEY` de Django y el secreto entre CloudFront y la API se generan
@@ -162,8 +160,8 @@ marcada una vez.
 
 ## 6. Crear el usuario administrador
 
-Las fundadoras manejan stock, precios y pedidos en `/api/admin/`. Para crear su
-usuario:
+Las fundadoras manejan el stock, los precios y las fotos en `/api/admin/`. Los
+pedidos siguen por Instagram. Para crear su usuario:
 
 1. Consola de AWS → **Lambda** → **Functions** → abre la que empieza con
    `forme-api-ManageFunction`.
@@ -181,55 +179,7 @@ usuario:
 
 ---
 
-## 7. Activar "Continuar con Google"
-
-Los clientes pueden entrar con su cuenta de Google en vez de crear una contraseña.
-Es opcional: sin este paso, el botón simplemente no aparece.
-
-### 7.1 Crear el cliente OAuth en Google Cloud
-
-1. Entra a <https://console.cloud.google.com> → crea un proyecto (por ejemplo
-   `forme`).
-2. Menú → **Google Auth Platform** (antes "Pantalla de consentimiento de OAuth"):
-   - **Branding:** nombre de la app `forme`, correo de soporte y correo de contacto.
-   - **Audience:** tipo **External** → **Publish app**. Mientras esté en
-     "Testing", solo los usuarios de prueba que agregues podrán entrar.
-   - No necesitas agregar scopes: el login usa solo `openid`, `email` y `profile`,
-     que no requieren verificación de Google.
-3. **Clients** → **Create client** → tipo **Web application**:
-   - **Authorized JavaScript origins:**
-     - `https://dxxxxxxxxxxxxx.cloudfront.net` (la URL de tu tienda, sin `/` al final)
-     - `http://localhost:5173` y `http://localhost` (para desarrollo)
-   - **Authorized redirect URIs:** déjalo vacío (el botón usa una ventana emergente).
-4. **Create** → copia el **Client ID** (termina en `.apps.googleusercontent.com`).
-   El Client ID es público, no es un secreto.
-
-### 7.2 Conectarlo
-
-1. GitHub → **Settings → Secrets and variables → Actions → Variables** → crea
-   `GOOGLE_CLIENT_ID` con ese valor.
-2. **Actions → CI/CD → Run workflow** (sin la casilla del catálogo).
-3. Para desarrollo local: pon el mismo valor en `client/.env.local` como
-   `VITE_GOOGLE_CLIENT_ID=…` y en `server/.env` como `GOOGLE_CLIENT_ID=…`.
-
-### 7.3 Cómo funciona por dentro
-
-- Google firma un token con sus llaves, y la API verifica firma, audiencia, emisor
-  y vigencia. La API no tiene salida a internet, así que una función programada
-  copia cada hora las llaves públicas de Google a un bucket de S3 que solo la red
-  privada de la API puede leer.
-- Si alguien ya tenía cuenta con contraseña y entra con Google usando un correo
-  `@gmail.com` (o de Google Workspace), las cuentas se unen y **la contraseña
-  anterior se desactiva**. Google demostró que esa persona es dueña del correo,
-  pero la tienda nunca verificó quién puso la contraseña. Así nadie puede
-  "pre-registrar" el correo de otra persona para espiar su dirección o sus pedidos.
-- Con otros correos (Hotmail, Yahoo…) Google no garantiza quién es el dueño actual,
-  así que no se unen: la persona entra con su contraseña.
-- Las cuentas del admin (staff) nunca se abren con Google; siempre usan contraseña.
-
----
-
-## 8. El día a día
+## 7. El día a día
 
 - **Flujo recomendado:** trabaja en una rama → abre un pull request (corren las
   pruebas) → haz merge a `main` → se despliega solo.
@@ -240,11 +190,13 @@ Es opcional: sin este paso, el botón simplemente no aparece.
 - **Regresar a una versión anterior:** `git revert <commit>` y push. Ojo: las
   migraciones de base de datos no se deshacen solas. Evita migraciones que borren
   columnas o datos sin respaldo.
-- **Stock, precios y pedidos** se cambian en el admin, sin deploy.
+- **Stock y precios** se cambian en el admin, sin deploy: en **Product
+  variants** está cada producto, color y talla en una sola tabla editable.
+  Mantenerlo al día evita que la gente pregunte por piezas agotadas.
 
 ---
 
-## 9. Mantener el costo bajo
+## 8. Mantener el costo bajo
 
 - La base de datos se pausa tras 5 minutos sin tráfico. Si la quieres siempre
   despierta (sin la espera de 15 s), cambia `MinCapacity: 0.5` en
@@ -257,7 +209,7 @@ Es opcional: sin este paso, el botón simplemente no aparece.
 
 ---
 
-## 10. Problemas comunes
+## 9. Problemas comunes
 
 | Síntoma | Causa y solución |
 | --- | --- |
@@ -267,33 +219,29 @@ Es opcional: sin este paso, el botón simplemente no aparece.
 | `Cannot find version 16.6 for aurora-postgresql` | AWS retiró esa versión menor. Cambia `DatabaseEngineVersion` en `server/template.yaml` por una vigente (16.3 o mayor). |
 | `forme-api … is in ROLLBACK_COMPLETE state and can not be updated` | Falló la creación inicial. Borra el stack `forme-api` en CloudFormation y vuelve a correr el workflow. |
 | La API responde `{"detail": "Forbidden."}` | CloudFront y la API tienen distinto secreto de origen. Vuelve a correr el workflow para sincronizarlos. |
-| Error 403 de CSRF al iniciar sesión | La API no conoce la URL de la tienda. Vuelve a correr el workflow, que la sincroniza. |
-| No aparece el botón de Google | Falta `GOOGLE_CLIENT_ID` en GitHub (y volver a desplegar), o un bloqueador de anuncios bloquea `accounts.google.com`. |
-| Google dice `origin_mismatch` / "origin not allowed" | Agrega la URL exacta de la tienda en **Authorized JavaScript origins** (puede tardar unos minutos en aplicar). |
-| "Ya tienes una cuenta con este correo. Entra con tu contraseña." | Es la protección del paso 7.3: esa cuenta usa un correo que no es de Gmail/Workspace. |
+| Error 403 de CSRF al entrar al admin | La API no conoce la URL del sitio. Vuelve a correr el workflow, que la sincroniza. |
+| Al dar "Pídelo por DM" no se pega nada | El navegador bloqueó el portapapeles (pasa en algunos navegadores dentro de apps). El chat de Instagram abre igual y la persona puede escribir su mensaje. |
 
 ---
 
-## 11. Borrar todo
+## 10. Borrar todo
 
 En la consola de AWS, en este orden:
 
 1. **S3** → el bucket de `forme-web` → **Empty**. Luego **CloudFormation** → borra
    el stack `forme-web`.
-2. **S3** → el bucket `forme-api-googlekeysbucket…` → **Empty**. Luego borra el
-   stack `forme-api`. Queda una foto final de la base de datos: bórrala en **RDS →
-   Snapshots** si ya no la quieres, para no pagar su almacenamiento.
+2. Borra el stack `forme-api`. Queda una foto final de la base de datos: bórrala
+   en **RDS → Snapshots** si ya no la quieres, para no pagar su almacenamiento.
 3. **Systems Manager → Parameter Store** → borra los parámetros `/forme-api/…`.
 4. Vacía el bucket de `aws-sam-cli-managed-default` y borra ese stack.
 5. Borra el stack `forme-github`.
 
 ---
 
-## 12. Alternativa: desplegar desde tu computadora
+## 11. Alternativa: desplegar desde tu computadora
 
 El mismo script que usa GitHub funciona en local, con los mismos secretos (SSM):
 
 - Requisitos: AWS CLI configurada con credenciales de administrador, SAM CLI,
   Docker, Python 3.12 y Node 22.
-- `./scripts/deploy.sh` (agrega `SEED_CATALOG=1` solo en el primer deploy, y
-  `GOOGLE_CLIENT_ID=…` si usas Google).
+- `./scripts/deploy.sh` (agrega `SEED_CATALOG=1` solo en el primer deploy).

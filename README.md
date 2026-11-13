@@ -1,19 +1,18 @@
 # for-me-website
 
-Shopping website for the amazing Renatta: the online store of **forme**, an
-activewear brand from Guadalajara (_Your form. Your way._).
+Catalog website for the amazing Renatta: the online showroom of **forme**, an
+activewear brand from Guadalajara (_Your form. Your way._). Orders stay on
+Instagram, the way the brand already sells: "pedidos y disponibilidad por DM".
 
 - **Home** styled after the Drop 01 catalog (taupe backdrop, serif wordmark), with
   the brand story, the founders, the brand principles and scroll transitions.
 - **Catalog** of the 18 Drop 01 styles: real photos per color, live stock per
-  color and size, filters and a shopping bag. Colors without stock link to an
-  Instagram DM, matching the catalog's "pedidos y disponibilidad por DM".
-- **Profile** with secure sign-up / sign-in (email and password, or "Continue
-  with Google"), shipping details and order history.
-- **Checkout** that reserves stock atomically; payment and delivery are then
-  arranged by Instagram DM, the way the brand already sells.
+  color and size, and filters. Each piece has a "Pídelo por DM" button that
+  copies a ready message (_"Me interesa esta pieza: Leggings Sculpt en color
+  Negro, talla M. ¿Está disponible?"_) and opens the brand's Instagram chat.
+  Instagram links can't pre-fill a message, so the shopper pastes it.
 - **Django admin** (`/api/admin/`) for the founders to manage stock, prices and
-  orders.
+  photos. Shoppers have no accounts: the site keeps no personal data.
 
 ## Architecture
 
@@ -36,29 +35,20 @@ possible:
   for smooth scrolling. Served from S3 through CloudFront.
 - **server/**: Django 5.2 LTS + Django REST Framework, following the
   _fat models, thin views_ convention. Runs on AWS Lambda through `apig-wsgi`.
-  - `accounts`: custom `User` (email login + shipping details).
-  - `store`: catalog (category → product → color → size with stock) and orders.
-    The business rules live here (`ProductVariant.reserve`, `Order.place`,
-    `Order.cancel`).
-  - `api`: endpoints only (serializers, viewsets, permissions, error format).
-- CloudFront serves the site and the API from one domain, so the session and
-  CSRF cookies are first-party and no CORS is needed.
+  - `accounts`: custom `User` with email login, for the admin.
+  - `store`: catalog (category → product → color → size with stock).
+  - `api`: read-only catalog endpoints (serializers, viewsets, error format).
+- CloudFront serves the site and the API from one domain, so the admin's
+  session and CSRF cookies are first-party and no CORS is needed.
 - **CI/CD**: `.github/workflows/ci-cd.yml` runs the checks on every pull request
   and push, and deploys pushes to `main`. GitHub gets short-lived AWS credentials
   through OIDC (`infra/github-deploy-role.yaml`), so no AWS keys live in GitHub.
 
 ### Security
 
-- Django sessions in `HttpOnly`, `Secure`, `SameSite=Lax` cookies, and CSRF
-  checks on every write, including anonymous login and registration.
-- Argon2 password hashing and Django's password validators.
-- Login and registration are rate limited per client IP. CloudFront supplies
-  the IP, so it can't be spoofed.
-- "Continue with Google" checks each ID token's signature, audience, issuer and
-  expiry. The API has no internet access, so a scheduled function copies Google's
-  public keys to S3 every hour, readable only from the API's VPC. An existing
-  account is only linked when Google hosts the mailbox (Gmail or Workspace), and
-  linking drops its unverified password. Staff accounts never open with Google.
+- The public API is read-only; the only way to change data is the Django admin.
+- The admin uses Django sessions in `HttpOnly`, `Secure`, `SameSite=Lax`
+  cookies, CSRF checks, Argon2 password hashing and Django's password validators.
 - Deploy secrets are SecureStrings in SSM Parameter Store, created on the first
   deploy and masked in the workflow logs.
 - The Lambda URL rejects any request without CloudFront's secret header. The
@@ -76,13 +66,9 @@ cd server
 python -m venv .venv && source .venv/Scripts/activate   # Windows Git Bash
 pip install -r dev-requirements.txt
 python manage.py migrate
-python manage.py createcachetable
 python manage.py seed_catalog                 # stock count from 12-oct-2026
 python manage.py create_staff_user --email you@example.com --password '...'
 python manage.py runserver
-
-# Optional "Continue with Google": put the web client ID in server/.env
-# (GOOGLE_CLIENT_ID) and client/.env.local (VITE_GOOGLE_CLIENT_ID).
 
 # Storefront → http://localhost:5173 (proxies /api to the API)
 cd client
@@ -103,8 +89,8 @@ Step-by-step guide, from creating the AWS account to CI/CD and troubleshooting
 (in Spanish): [DEPLOY.md](DEPLOY.md).
 
 In short: create the `infra/github-deploy-role.yaml` stack once, save its
-`RoleArn` output as the `AWS_ROLE_ARN` repository variable (plus `AWS_REGION`
-and, optionally, `GOOGLE_CLIENT_ID`), and every push to `main` deploys. For the
+`RoleArn` output as the `AWS_ROLE_ARN` repository variable (plus `AWS_REGION`),
+and every push to `main` deploys. For the
 first deploy, run the workflow by hand with "Load the Drop 01 catalog" checked.
 
 `scripts/deploy.sh` does the work, on GitHub's runner or locally (AWS CLI, a
@@ -116,8 +102,8 @@ SEED_CATALOG=1 ./scripts/deploy.sh   # first deploy: also loads the catalog
 ```
 
 The script creates the secrets once (SSM Parameter Store), deploys the API
-stack, runs the migrations, copies Google's sign-in keys, deploys the storefront
-stack and uploads the build. Then create the admin user:
+stack, runs the migrations, deploys the storefront stack and uploads the build.
+Then create the admin user:
 
 ```bash
 aws lambda invoke --function-name <ManageFunctionName output> \
@@ -137,7 +123,6 @@ first deploy. After that, manage stock in the admin.
 | Lambda | $0 within the always-free tier (1M requests, 400k GB-s) |
 | Aurora Serverless v2 | $0 while paused; ~$0.06/h while awake (0.5 ACU) + $0.10/GB-month storage |
 | CloudWatch Logs | cents (14-day retention) |
-| Google sign-in keys (hourly Lambda, EventBridge, S3 gateway endpoint) | $0 |
 | GitHub Actions (checks and deploys) | $0 for public repositories |
 
 The design leaves out NAT gateways, API Gateway, load balancers and Secrets
@@ -152,24 +137,15 @@ matters more than cost, set `MinCapacity: 0.5` in `server/template.yaml`
 
 ## API
 
-All responses are JSON. Errors share one shape, `{"detail", "code", "fields"?, "meta"?}`;
-the storefront translates `code` into Spanish.
+Read-only and public; all responses are JSON. Errors share one shape,
+`{"detail", "code", "fields"?}`.
 
 | Method | Path | Access | Purpose |
 | --- | --- | --- | --- |
 | GET | `/api/health/` | public | Health check, wakes the database |
-| GET | `/api/v1/auth/session/` | public | Current user (or `null`) + CSRF cookie |
-| POST | `/api/v1/auth/register/` | public, throttled | Create account and start a session |
-| POST | `/api/v1/auth/login/` | public, throttled | Start a session |
-| POST | `/api/v1/auth/google/` | public, throttled | Start a session with a Google ID token (creates the account on first use) |
-| POST | `/api/v1/auth/logout/` | session | End the session |
-| GET, PATCH | `/api/v1/me/` | session | Profile and shipping details |
 | GET | `/api/v1/categories/` | public | Categories with product and stock counts |
 | GET | `/api/v1/products/?category=<slug>` | public | Products with their colors and stock per size |
 | GET | `/api/v1/products/<slug>/` | public | One product |
-| GET, POST | `/api/v1/orders/` | session | Own orders / place an order (409 `out_of_stock`) |
-| GET | `/api/v1/orders/<id>/` | session | One own order |
-| POST | `/api/v1/orders/<id>/cancel/` | session | Cancel a pending or confirmed order and restock |
 
 ## Catalog data
 

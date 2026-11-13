@@ -7,11 +7,9 @@ import {
 import { useState } from "react";
 import { Link, NavLink } from "react-router";
 
-import { INSTAGRAM_URL } from "../config";
-import { useAuth } from "../context/auth";
-import { useCart } from "../context/cart";
+import { INSTAGRAM_DM_URL, INSTAGRAM_URL } from "../config";
 import styles from "./Header.module.css";
-import { BagIcon, InstagramIcon, UserIcon } from "./icons";
+import { InstagramIcon } from "./icons";
 import { Logo } from "./Logo";
 
 const EASE_OUT = [0.22, 1, 0.36, 1] as const;
@@ -24,17 +22,6 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user } = useAuth();
-  const cart = useCart();
-  const [seenCount, setSeenCount] = useState(cart.count);
-
-  // Reveal the header when something is added so the bag count is visible.
-  if (cart.count !== seenCount) {
-    setSeenCount(cart.count);
-    if (cart.count > seenCount) {
-      setIsHidden(false);
-    }
-  }
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious() ?? 0;
@@ -76,35 +63,16 @@ export function Header() {
         </Link>
 
         <div className={styles.actions}>
-          <NavLink to="/profile" className={navClass}>
-            <UserIcon />
-            <span className={styles.actionLabel}>
-              {user ? `Hola, ${user.first_name}` : "Iniciar sesión"}
-            </span>
-          </NavLink>
-          <button
-            type="button"
-            className={styles.bag}
-            onClick={cart.open}
-            aria-label={`Abrir bolsa (${cart.count})`}
+          <a
+            className={styles.instagram}
+            href={INSTAGRAM_DM_URL}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Pide por DM en Instagram"
           >
-            <BagIcon />
-            <span className={styles.actionLabel}>Bolsa</span>
-            <AnimatePresence>
-              {cart.count > 0 && (
-                <motion.span
-                  key={cart.count}
-                  className={styles.count}
-                  initial={{ scale: 0.4, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.4, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 22 }}
-                >
-                  {cart.count}
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </button>
+            <InstagramIcon />
+            <span className={styles.actionLabel}>Pide por DM</span>
+          </a>
         </div>
       </div>
 
@@ -121,7 +89,6 @@ export function Header() {
               {[
                 { to: "/", label: "Inicio" },
                 { to: "/catalog", label: "Catálogo" },
-                { to: "/profile", label: user ? "Mi perfil" : "Iniciar sesión" },
               ].map((link, index) => (
                 <motion.div
                   key={link.to}

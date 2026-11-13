@@ -1,25 +1,8 @@
-from django.core.cache import cache
-
 from api import models
-from store.tests.data.factories import (
-    CategoryFactory,
-    ColorFactory,
-    ProductFactory,
-    UserFactory,
-)
+from store.tests.data.factories import CategoryFactory, ColorFactory, ProductFactory
 
 
 class CommonSetup:
-    password = "a-Strong-passw0rd"
-
-    def set_up_users(self):
-        self.user_factory = UserFactory()
-        self.customer = self.user_factory.create(password=self.password)
-        self.other_customer = self.user_factory.create()
-        self.customer_without_address = self.user_factory.create(
-            address_line="", postal_code=""
-        )
-
     def set_up_catalog(self):
         self.category_factory = CategoryFactory()
         self.product_factory = ProductFactory()
@@ -47,7 +30,4 @@ class CommonSetup:
         )
 
     def setUp(self):
-        # Throttle history lives in the cache and would leak between tests.
-        cache.clear()
-        self.set_up_users()
         self.set_up_catalog()
